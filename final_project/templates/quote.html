@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Quote
+{% endblock %}
+
+{% block main %}
+    <div class="register-container">
+        <form action="/quote" method="post">
+            <div class="mb-3">
+                <input autocomplete="off" autofocus class="form-control" id="symbol" name="symbol" placeholder="Stock" type="text">
+            </div>
+            <button class="btn btn-rainbow" type="submit">Search</button>
+        </form>
+    </div>
+
+    {% if request.method == 'GET' %}
+        <style>
+            table {
+                width: 20%; /* Adjust the width as needed */
+                margin: 0 auto; /* Center the table */
+            }
+
+        </style>
+        <h1>Top 10 Most Owned Stocks</h1>
+
+        <table id="transaction-table">
+            <thead>
+                <tr>
+                    <th>Stock Symbol</th>
+                    <th>Stock Volume</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stock in stocks %}
+                    <tr>
+                        <td>{{ stock.symbol }}</td>
+                        <td>{{ stock.net_holdings }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    {% if request.method == 'POST' %}
+        <h2 style="padding-top: 1em;">Stock Quote for {{ symbol }}</h2>
+        <table id="transaction-table" class="trt">
+            <thead>
+                <tr>
+                    <th style="background-color: #37414e;">Price: {{ price }}</th>
+                    <th>One Year</th>
+                    <th>Six Months</th>
+                    <th>Three Months</th>
+                    <th>One Month</th>
+                    <th>One Week</th>
+                    <th>One Day</th>
+                    <!-- Add more headers as needed -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="background-color: #212529;">$USD</td>
+                    {% for period in ['one_year', 'six_months', 'three_months', 'one_month', 'one_week', 'one_day'] %}
+                        <td class="{{ 'sell' if development_value[period] < 0 else 'buy' }}">${{ development_value[period] }}</td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <td style="background-color: #212529;">%</td>
+                    {% for period in ['one_year', 'six_months', 'three_months', 'one_month', 'one_week', 'one_day'] %}
+                        <td class="{{ 'sell' if development_percentage[period] < 0 else 'buy' }}">{{ development_percentage[period] }}%</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+   {% endif %}
+
+   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+   <div id="plotly-graph"></div>
+   <script>
+       // Parse the Plotly JSON and display the graph
+       var graphJson = {{ graph_json|safe }};
+       Plotly.newPlot('plotly-graph', graphJson.data, graphJson.layout);
+   </script>
+{% endblock %}

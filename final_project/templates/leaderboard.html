@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Leaderboard
+{% endblock %}
+
+{% block main %}
+    <h2>Leaderboard</h2>
+    <table id="transaction-table" class="trt">
+        <thead>
+            <tr>
+                <th>Ranking</th>
+                <th>Username</th>
+                <th>Net Worth</th>
+                <th>Percentage to You</th>
+                <th>Percentage of Total</th>
+                <!-- Add more headers as needed -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users_balance %}
+            <tr class="{% if user.difference_percentage < 0 %}sell{% elif user.difference_percentage > 0 %}buy{% elif user.username == current_user_username[0]['username'] %}user{% else %}zero-difference{% endif %} {% if loop.index is even %}even-row{% else %}odd-row{% endif %}">
+                <td>{{ user.ranking }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.total_balance }}</td>
+                <td>{{ user.difference_percentage }}%</td>
+                <td>{{ user.percentage }}%</td>
+                <!-- Add more data fields as needed -->
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

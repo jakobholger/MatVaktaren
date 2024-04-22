@@ -7,7 +7,7 @@ This project is a WebScraper based in Python.
 
 1. Clone the repository
 ```
-git clone https://github.com/Str4k/Python-WebScraper.git
+git clone https://github.com/jakobholger/WebscraperMat.git
 ```
 2. Navigate to the cloned directory
 ```

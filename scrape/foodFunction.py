@@ -16,6 +16,8 @@ def searchFood(url):
     #open website url parameter
     driver.get(url)
 
+    time.sleep(0.1)
+
     # Find all elements with data-testid="product"
     items = driver.find_elements(By.CSS_SELECTOR, '[data-testid="product"]')
     
@@ -49,6 +51,3 @@ def searchFood(url):
     driver.close()
 
     time.sleep(0.1)
-
-    return "Done"
-

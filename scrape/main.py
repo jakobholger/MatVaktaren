@@ -15,19 +15,19 @@ from foodFunction import searchFood
 #Totalt: 23 olika matvaruprodukter från 7 kategorier
 
 #ägg
-print(searchFood('https://www.willys.se/sortiment/mejeri-ost-och-agg/agg'))
+searchFood('https://www.willys.se/sortiment/mejeri-ost-och-agg/agg')
 
 #mjöl
-print(searchFood('https://www.willys.se/sortiment/skafferi/bakning/mjol'))
+searchFood('https://www.willys.se/sortiment/skafferi/bakning/mjol')
 
 #långkornigt ris
-print(searchFood('https://www.willys.se/sortiment/skafferi/pasta-ris-och-matgryn/ris'))
+searchFood('https://www.willys.se/sortiment/skafferi/pasta-ris-och-matgryn/ris')
 
 #pasta
-print(searchFood('https://www.willys.se/sok?q=pasta'))
+searchFood('https://www.willys.se/sok?q=pasta')
 
 #mellanmjölk
-print(searchFood('https://www.willys.se/sok?q=mellanmj%C3%B6lk'))
+searchFood('https://www.willys.se/sok?q=mellanmj%C3%B6lk')
 
 
 #Todo Push elements to database

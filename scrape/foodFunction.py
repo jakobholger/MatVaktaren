@@ -6,8 +6,8 @@ class Product:
     def __init__(self, name, pricePerUnit):
         self.name = name
         self.pricePerUnit = pricePerUnit
-    def __str__(self):
-        return f"Product(name={self.name}, pricePerUnit={self.pricePerUnit})"
+    def __repr__(self):
+        return f"<name:{self.name} pricePerUnit:{self.pricePerUnit}>"
 
 def searchFood(url):
     #setup driver for chrome
@@ -30,10 +30,10 @@ def searchFood(url):
             price_element = item.find_element(By.XPATH, './/div[@class="sc-9dc280cb-17 dOZyhE"]')
             price = price_element.text
 
-            if price[len(price)-2:]=="kg":
-                break
+            #if price[len(price)-2:]=="kg":
+                #break
 
-            # Print the product name and price
+            #Print the product name and price
             #print("Product:", title)
             #print("Price per egg:", price[8:])
             #eggPriceArray.append(price[8:][:5].replace(",","."))
@@ -41,5 +41,14 @@ def searchFood(url):
             itemsArray.append(Product(title, price[8:][:5].replace(",",".")))
     else:
         print("[-] Unable to find items.")
-    
-    print(itemsArray)
+
+    for item in itemsArray:
+        print(item)
+
+
+    driver.close()
+
+    time.sleep(0.1)
+
+    return "Done"
+

@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Buy
+{% endblock %}
+
+{% block main %}
+    <div class="register-container">
+        <form id="buyForm" action="/buy" method="post">
+            <div class="mb-3">
+                <input autocomplete="off" autofocus class="form-control" id="symbol" name="symbol" placeholder="Stock Symbol" type="text">
+            </div>
+            <div class="mb-3">
+                <input class="form-control" id="shares" name="shares" pattern="[1-9]+" placeholder="Amount of Shares" type="number" min="1">
+                <div id="sharesError" style="color: red;"></div>
+            </div>
+            <button class="btn btn-rainbow" type="submit">Buy</button>
+        </form>
+    </div>
+    <script src="static/js/buyValidation.js"></script>
+    {% if symbol %}
+       <h2>Stock Purchase for {{ symbol }}</h2>
+        <p> Price Per Share: {{ pricePerShare }}</p>
+        <p> Shares: {{ shares }}</p>
+        <p> Price: {{ price }}</p>
+       
+   {% endif %}
+{% endblock %}

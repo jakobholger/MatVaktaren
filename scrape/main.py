@@ -1,6 +1,21 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
+from foodFunction import searchFood
+
+print(searchFood('https://www.willys.se/sok?q=%C3%A4gg%3Acategory%3A%C3%84gg'))
+time.sleep(10)
+
+#Hämta data om följande produkter:
+#Bröd och spannmål: mjöl, ris, pasta
+#Mejeriprodukter: mjölk, ägg, smör
+#Frukt och grönt: isbergssallad, tomat, gurka, potatis
+#Kött och fisk: nötkött, kyckling, fläskkött, lax
+#Konserver: Gulashsoppa, tomatsoppa, tonfisk
+#Drycker: kaffe: te, oboy
+#Snacks och godis: chips, surgodis, choklad
+
+#Totalt: 23 olika matvaruprodukter från 7 kategorier
 
 url = 'https://www.willys.se/sok?q=%C3%A4gg%3Acategory%3A%C3%84gg'
 
@@ -87,4 +102,9 @@ averageMilkPrice = total_sum / len(milkPriceArray)
 
 print("Average price per liter:", averageMilkPrice, "kr")
 
+
+
+
+
+# Push all found items to the database
 driver.close()

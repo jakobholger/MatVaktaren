@@ -1,7 +1,33 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
-from foodFunction import searchFood
+from foodFunction import searchStore, willys, ica, coop, mathem
+import sqlite3
+
+#Initiera databas
+
+conn = sqlite3.connect('products.db')
+cursor = conn.cursor()
+
+# Create the products table
+cursor.execute('''CREATE TABLE IF NOT EXISTS products (
+                    id INTEGER PRIMARY KEY,
+                    product_name TEXT
+                )''')
+
+# Create the price history table
+cursor.execute('''CREATE TABLE IF NOT EXISTS price_history (
+                    id INTEGER PRIMARY KEY,
+                    product_id INTEGER,
+                    price REAL,
+                    unit TEXT,
+                    pushed_date DATE,
+                    FOREIGN KEY (product_id) REFERENCES products(id)
+                )''')
+
+conn.commit()
+conn.close()
+
 
 #Hämta data om följande produkter:
 #Bröd och spannmål: mjöl, ris, pasta
@@ -14,20 +40,33 @@ from foodFunction import searchFood
 
 #Totalt: 23 olika matvaruprodukter från 7 kategorier
 
-#ägg
-searchFood('https://www.willys.se/sortiment/mejeri-ost-och-agg/agg')
+#Mathem mjölk
+searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/91-mjolk/', mathem, "l")
+
+#Mathem ägg
+searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/129-agg-jast/130-agg/', mathem, "st")
+
+#Mathem smör&margarin
+searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/113-smor-margarin/114-bordsask-smor-margarin/', mathem, "kg")
+
+#Mathem mjöl
+searchStore('https://www.mathem.se/se/categories/329-skafferi/354-mjol-bakning/356-vetemjol/', mathem, "kg")
+
+#Willys ägg
+searchStore('https://www.willys.se/sortiment/mejeri-ost-och-agg/agg?q=%3AtopRated%3AproductLabelTypes%3ASWEDISH_FLAG', willys, "st")
+
 
 #mjöl
-searchFood('https://www.willys.se/sortiment/skafferi/bakning/mjol')
+#searchStore('https://www.willys.se/sortiment/skafferi/bakning/mjol', willys)
 
 #långkornigt ris
-searchFood('https://www.willys.se/sortiment/skafferi/pasta-ris-och-matgryn/ris')
+#searchStore('https://www.willys.se/sortiment/skafferi/pasta-ris-och-matgryn/ris', willys)
 
 #pasta
-searchFood('https://www.willys.se/sok?q=pasta')
+#searchStore('https://www.willys.se/sok?q=pasta', willys)
 
 #mellanmjölk
-searchFood('https://www.willys.se/sok?q=mellanmj%C3%B6lk')
+#searchStore('https://www.willys.se/sok?q=mellanmj%C3%B6lk', willys)
 
 
 #Todo Push elements to database

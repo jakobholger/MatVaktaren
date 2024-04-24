@@ -13,7 +13,8 @@ class Product:
         return f"<name:{self.name} pricePerUnit:{self.comparisonPrice}>"
     
 class Company:
-    def __init__(self, productClass, classType, titleClass, titleType, priceClass, priceType):
+    def __init__(self, name, productClass, classType, titleClass, titleType, priceClass, priceType):
+        self.name = name
         self.productClass = productClass
         self.classType = classType
         self.titleClass = titleClass
@@ -28,17 +29,15 @@ class Company:
     #Hitta pris elementet samt klassen och typen.
     #För in dessa i en ett nytt objekt instansierat från Company klassen.
     
-willys = Company("sc-9dc280cb-0 CZBGo", "div", "sc-9dc280cb-6 bJGDJx", "div", "sc-9dc280cb-17 dOZyhE", "div")
-ica = Company("_box_1ldjz_1 _box--shadow_1ldjz_15 salt-p--0", "div", "link__Link-sc-14ymsi2-0 cgxCVj link__Link-sc-14ymsi2-0 base__Title-sc-1mnb0pd-27 base__FixedHeightTitle-sc-1mnb0pd-43 cgxCVj ctGnCh cCRJZx", "a", "_text_f6lbl_1 _text--m_f6lbl_23 standard-promotion__PromotionIntentText-sc-1vpsrpe-2 fop__PricePerText-sc-sgv9y1-5 kxmtvg eNYENy", "span")
-coop = Company("Grid-cell u-size1of4", "div", "ProductTeaser-heading", "p", "ProductTeaser-brand", "div")
-mathem = Company("k-grid-span-6 md:k-grid-span-4 lg:k-grid-span-2 k-column", "div", "k-text-style k-text-style--title-xxs k-text--hyphens-auto styles_hyphens__IEbdn", "h2", "k-text-style k-text-style--body-s k-text-color--subdued", "p")
+willys = Company("Willys", "sc-9dc280cb-0 CZBGo", "div", "sc-9dc280cb-6 bJGDJx", "div", "sc-9dc280cb-17 dOZyhE", "div")
+ica = Company("Ica", "_box_1ldjz_1 _box--shadow_1ldjz_15 salt-p--0", "div", "link__Link-sc-14ymsi2-0 cgxCVj link__Link-sc-14ymsi2-0 base__Title-sc-1mnb0pd-27 base__FixedHeightTitle-sc-1mnb0pd-43 cgxCVj ctGnCh cCRJZx", "a", "_text_f6lbl_1 _text--m_f6lbl_23 standard-promotion__PromotionIntentText-sc-1vpsrpe-2 fop__PricePerText-sc-sgv9y1-5 kxmtvg eNYENy", "span")
+coop = Company("COOP", "Grid-cell u-size1of4", "div", "ProductTeaser-heading", "p", "ProductTeaser-brand", "div")
+mathem = Company("Mathem", "k-grid-span-6 md:k-grid-span-4 lg:k-grid-span-2 k-column", "div", "k-text-style k-text-style--title-xxs k-text--hyphens-auto styles_hyphens__IEbdn", "h2", "k-text-style k-text-style--body-s k-text-color--subdued", "p")
 
 
 
 
-
-
-def searchStore(url, c, unit):
+def searchStore(url, c, unit, store_name):
 
     #setup driver for chrome
     driver = webdriver.Chrome()
@@ -69,8 +68,9 @@ def searchStore(url, c, unit):
             pushPrice = price[:index].replace("Jmf-pris ", "").replace(",", ".")
             
             itemsArray.append(Product(title, price[:index].replace("Jmf-pris ", "").replace(",", ".")+"kr/" + unit))
-            create_product(title)
-            add_price_for_product(title, pushPrice, pushed_date)
+            pushUnit = "kr/" + unit
+            create_product(title, store_name)
+            add_price_for_product(title, pushPrice, pushed_date, pushUnit, store_name)
 
 
     else:

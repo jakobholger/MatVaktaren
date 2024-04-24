@@ -12,7 +12,8 @@ cursor = conn.cursor()
 # Create the products table
 cursor.execute('''CREATE TABLE IF NOT EXISTS products (
                     id INTEGER PRIMARY KEY,
-                    product_name TEXT
+                    product_name TEXT,
+                    store_name TEXT
                 )''')
 
 # Create the price history table
@@ -41,19 +42,19 @@ conn.close()
 #Totalt: 23 olika matvaruprodukter från 7 kategorier
 
 #Mathem mjölk
-searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/91-mjolk/', mathem, "l")
+searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/91-mjolk/', mathem, "l", mathem.name)
 
 #Mathem ägg
-searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/129-agg-jast/130-agg/', mathem, "st")
+searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/129-agg-jast/130-agg/', mathem, "st", mathem.name)
 
 #Mathem smör&margarin
-searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/113-smor-margarin/114-bordsask-smor-margarin/', mathem, "kg")
+searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/113-smor-margarin/114-bordsask-smor-margarin/', mathem, "kg", mathem.name)
 
 #Mathem mjöl
-searchStore('https://www.mathem.se/se/categories/329-skafferi/354-mjol-bakning/356-vetemjol/', mathem, "kg")
+searchStore('https://www.mathem.se/se/categories/329-skafferi/354-mjol-bakning/356-vetemjol/', mathem, "kg", mathem.name)
 
 #Willys ägg
-searchStore('https://www.willys.se/sortiment/mejeri-ost-och-agg/agg?q=%3AtopRated%3AproductLabelTypes%3ASWEDISH_FLAG', willys, "st")
+searchStore('https://www.willys.se/sortiment/mejeri-ost-och-agg/agg?q=%3AtopRated%3AproductLabelTypes%3ASWEDISH_FLAG', willys, "st", willys.name)
 
 
 #mjöl

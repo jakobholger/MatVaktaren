@@ -2,15 +2,15 @@ import sqlite3
 from datetime import datetime
 
 # Function to add a new price for an existing product
-def add_price_for_product(product_name, price, pushed_date):
-    product_id = get_product_id(product_name)
+def add_price_for_product(product_name, price, pushed_date, unit, store_name):
+    product_id = get_product_id(product_name, store_name)
     if product_id is not None:
 
         conn = sqlite3.connect('products.db')
         cursor = conn.cursor()
 
-        cursor.execute('''INSERT INTO price_history (product_id, price, pushed_date)
-                      VALUES (?, ?, ?)''', (product_id, price, pushed_date))
+        cursor.execute('''INSERT INTO price_history (product_id, price, pushed_date, unit)
+                      VALUES (?, ?, ?, ?)''', (product_id, price, pushed_date, unit))
 
         conn.commit()
         conn.close()
@@ -18,24 +18,33 @@ def add_price_for_product(product_name, price, pushed_date):
         print(f"Product '{product_name}' not found.")
 
 # Function to create a new product in the products table
-def create_product(product_name):
+def create_product(product_name, store_name):
     conn = sqlite3.connect('products.db')
     cursor = conn.cursor()
 
-    # Insert the new product into the products table
-    cursor.execute('''INSERT INTO products (product_name) VALUES (?)''', (product_name,))
+    # Check if a product with the same name and store already exists
+    cursor.execute('''SELECT id FROM products WHERE product_name = ? AND store_name = ?''', (product_name, store_name))
+    existing_product = cursor.fetchone()
 
-    conn.commit()
+    if existing_product:
+        print("Product with the same name and store already exists.")
+    else:
+        # Insert the new product into the products table
+        cursor.execute('''INSERT INTO products (product_name, store_name) VALUES (?, ?)''', (product_name, store_name))
+        conn.commit()
+        print("Product created successfully.")
+
     conn.close()
 
 
-# Function to fetch the product_id based on the product name
-def get_product_id(product_name):
+
+# Function to fetch the product_id based on the product name and store name
+def get_product_id(product_name, store_name):
     conn = sqlite3.connect('products.db')
     cursor = conn.cursor()
 
     # Execute a SELECT query to retrieve the product_id
-    cursor.execute('''SELECT id FROM products WHERE product_name = ?''', (product_name,))
+    cursor.execute('''SELECT id FROM products WHERE product_name = ? AND store_name = ?''', (product_name, store_name))
     row = cursor.fetchone()
     conn.close()
 

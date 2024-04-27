@@ -18,23 +18,19 @@ def add_price_for_product(product_name, price, pushed_date, unit, store_name):
         print(f"Product '{product_name}' not found.")
 
 # Function to create a new product in the products table
-def create_product(product_name, store_name):
+def create_product(product_name, store_name, category):
     conn = sqlite3.connect('products.db')
     cursor = conn.cursor()
 
-    # Check if a product with the same name and store already exists
-    cursor.execute('''SELECT id FROM products WHERE product_name = ? AND store_name = ?''', (product_name, store_name))
-    existing_product = cursor.fetchone()
-
-    if existing_product:
-        print("Product with the same name and store already exists.")
-    else:
+    product_id = get_product_id(product_name, store_name)
+    if product_id is None:
         # Insert the new product into the products table
-        cursor.execute('''INSERT INTO products (product_name, store_name) VALUES (?, ?)''', (product_name, store_name))
+        cursor.execute('''INSERT INTO products (product_name, store_name, category) VALUES (?, ?, ?)''', (product_name, store_name, category))
         conn.commit()
+        conn.close()
         print("Product created successfully.")
-
-    conn.close()
+    else:
+        print("Product with the same name and store already exists.")
 
 
 

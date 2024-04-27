@@ -7,7 +7,7 @@ headers = {
 }
 
 
-url = 'https://www.willys.se/_next/data/6812123c/sv.json?q=%C3%A4gg&name=agg-24p-Frigaende-Inomhus-Medium-101187348_ST&productCode=101187348_ST'
+url = 'https://www.willys.se/sok?q=%C3%A4gg%3Acategory%3A%C3%84gg'
 response = requests.get(url, headers=headers)
 
 if response.status_code == 200:
@@ -17,11 +17,7 @@ if response.status_code == 200:
 else:
     print("Something went wrong! Status code: " + (str)(response.status_code))
 
-
-
 soup = BeautifulSoup(html_content, 'html.parser')
-
-print(soup)
-products = soup.select('div.sc-9dc280cb-0 CZBGo')
-
-print(products)
+print(soup.prettify())
+price = soup.find('p', attrs={'class': 'sc-1cce6383-14 jVdrOk'})
+print(price)

@@ -37,7 +37,7 @@ mathem = Company("Mathem", "k-grid-span-6 md:k-grid-span-4 lg:k-grid-span-2 k-co
 
 
 
-def searchStore(url, c, unit, store_name):
+def searchStore(url, c, unit, category):
 
     #setup driver for chrome
     driver = webdriver.Chrome()
@@ -69,8 +69,8 @@ def searchStore(url, c, unit, store_name):
             
             itemsArray.append(Product(title, price[:index].replace("Jmf-pris ", "").replace(",", ".")+"kr/" + unit))
             pushUnit = "kr/" + unit
-            create_product(title, store_name)
-            add_price_for_product(title, pushPrice, pushed_date, pushUnit, store_name)
+            create_product(title, c.name, category)
+            add_price_for_product(title, pushPrice, pushed_date, pushUnit, c.name)
 
 
     else:

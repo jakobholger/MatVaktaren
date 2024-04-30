@@ -3,7 +3,7 @@ from selenium.webdriver.common.by import By
 import time
 import sqlite3
 from datetime import datetime
-from dbFunctions import add_price_for_product, create_product
+from scrape.seleniumScraper.dbFunctions import add_price_for_product, create_product
 
 class Product:
     def __init__(self, name, comparisonPrice):

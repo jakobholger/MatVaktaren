@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
-from foodFunction import searchStore, willys, ica, coop, mathem
+from scrape.seleniumScraper.foodFunction import searchStore, willys, ica, coop, mathem
 import sqlite3
 
 #Initiera databas
@@ -52,10 +52,10 @@ searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/129-agg-jas
 searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/113-smor-margarin/114-bordsask-smor-margarin/', mathem, "kg", "butter")
 
 #Mathem mjöl
-searchStore('https://www.mathem.se/se/categories/329-skafferi/354-mjol-bakning/356-vetemjol/', mathem, "kg", "flour")
+#searchStore('https://www.mathem.se/se/categories/329-skafferi/354-mjol-bakning/356-vetemjol/', mathem, "kg", "flour")
 
 #Willys ägg
-searchStore('https://www.willys.se/sortiment/mejeri-ost-och-agg/agg?q=%3AtopRated%3AproductLabelTypes%3ASWEDISH_FLAG', willys, "st", "egg")
+#searchStore('https://www.willys.se/sortiment/mejeri-ost-och-agg/agg?q=%3AtopRated%3AproductLabelTypes%3ASWEDISH_FLAG', willys, "st", "egg")
 
 
 #mjöl

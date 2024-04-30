@@ -1,14 +1,15 @@
 import requests
 import json
+from dbFunctions import create_product, add_price_for_product
+from datetime import datetime
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
 }
 
-productCode = '101190071_ST'
-#productCode = '100087978_ST'
+pushed_date = datetime.now().date()
 
-def main(productCode):
+def scrape(productCode):
 #url = 'https://www.willys.se/_next/data/6812123c/sv.json?q=%C3%A4gg&name=agg-24p-Frigaende-Inomhus-Medium-101187348_ST&productCode=101187348_ST'
     #    url = 'https://www.willys.se/axfood/rest/p/100087978_ST'
     url = 'https://www.willys.se/axfood/rest/p/' + productCode
@@ -20,20 +21,19 @@ def main(productCode):
         print("Something went wrong! Status code: " + (str)(response.status_code))
         return 0
 
-    parse_html(html_content)
+    parse_html(html_content, productCode)
 
-def parse_html(html_content):
+def parse_html(html_content, productCode):
     json_data = json.loads(html_content)
-    print(type(json_data))
+    #print(type(json_data))
 
-    if (json_data['potentialPromotions'][0]['applied']) == True:
-        print(json_data['potentialPromotions'][0]['price'])
-        print()
-        print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
-    else:
-        print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
+    #if (json_data['potentialPromotions'][0]['applied']) == True:
+    #    print(json_data['potentialPromotions'][0]['price'])
+    #    print()
+    #    print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
+   # else:
+    #    print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
 
     print(json_data['name'], "|", json_data['price'], "/", json_data['displayVolume'], "|", json_data['comparePrice'], "/", json_data['comparePriceUnit'])
-
-if __name__ == "__main__":
-    main(productCode)
+    create_product(json_data['name'], json_data['displayVolume'], productCode)
+    add_price_for_product(json_data['name'], json_data['price'], pushed_date, json_data['comparePrice'] + "/" + json_data['comparePriceUnit'], productCode)

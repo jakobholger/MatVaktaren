@@ -26,12 +26,13 @@ def parse_html(html_content):
     json_data = json.loads(html_content)
     print(type(json_data))
 
-    if (json_data['potentialPromotions'][0]['applied']) == True:
-        print(json_data['potentialPromotions'][0]['price'])
-        print()
-        print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
-    else:
-        print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
+    print(json_data)
+    #if (json_data['potentialPromotions'][0]['applied']) == True:
+    #    print(json_data['potentialPromotions'][0]['price'])
+    #    print()
+    #    print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
+    #else:
+    #    print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
 
     print(json_data['name'], "|", json_data['price'], "/", json_data['displayVolume'], "|", json_data['comparePrice'], "/", json_data['comparePriceUnit'])
 

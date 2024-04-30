@@ -14,6 +14,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS products (
                     id INTEGER PRIMARY KEY,
                     product_name TEXT,
                     weight TEXT,
+                    category TEXT,
                     product_code TEXT
                 )''')
 

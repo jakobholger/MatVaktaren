@@ -35,5 +35,5 @@ def parse_html(html_content, productCode):
     #    print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
 
     print(json_data['name'], "|", json_data['price'], "/", json_data['displayVolume'], "|", json_data['comparePrice'], "/", json_data['comparePriceUnit'])
-    create_product(json_data['name'], json_data['displayVolume'], productCode)
+    create_product(json_data['name'], json_data['displayVolume'], productCode, json_data['googleAnalyticsCategory'])
     add_price_for_product(json_data['name'], json_data['price'], pushed_date, json_data['comparePrice'] + "/" + json_data['comparePriceUnit'], productCode)

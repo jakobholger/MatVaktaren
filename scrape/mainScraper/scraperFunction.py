@@ -27,29 +27,12 @@ def parse_html(html_content, productCode):
     json_data = json.loads(html_content)
     #print(type(json_data))
 
-<<<<<<< HEAD:scrape/scraper.py
-    print(json_data)
-    #if (json_data['potentialPromotions'][0]['applied']) == True:
-    #    print(json_data['potentialPromotions'][0]['price'])
-    #    print()
-    #    print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
-    #else:
-    #    print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
-||||||| b572187:scrape/scraper.py
-    if (json_data['potentialPromotions'][0]['applied']) == True:
-        print(json_data['potentialPromotions'][0]['price'])
-        print()
-        print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
-    else:
-        print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
-=======
     #if (json_data['potentialPromotions'][0]['applied']) == True:
     #    print(json_data['potentialPromotions'][0]['price'])
     #    print()
     #    print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
    # else:
     #    print(json_data['potentialPromotions'][0]['lowestHistoricalPrice'])
->>>>>>> 354ff699d4402822f7c73deeaefda188d878bd03:scrape/mainScraper/scraperFunction.py
 
     print(json_data['name'], "|", json_data['price'], "/", json_data['displayVolume'], "|", json_data['comparePrice'], "/", json_data['comparePriceUnit'])
     create_product(json_data['name'], json_data['displayVolume'], productCode)

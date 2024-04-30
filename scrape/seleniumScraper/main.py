@@ -1,7 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
-from foodFunction import searchStore, willys, ica, coop, mathem
+from scrape.seleniumScraper.foodFunction import searchStore, willys, ica, coop, mathem
 import sqlite3
 
 #Initiera databas
@@ -13,7 +13,8 @@ cursor = conn.cursor()
 cursor.execute('''CREATE TABLE IF NOT EXISTS products (
                     id INTEGER PRIMARY KEY,
                     product_name TEXT,
-                    store_name TEXT
+                    store_name TEXT,
+                    category TEXT
                 )''')
 
 # Create the price history table
@@ -42,19 +43,19 @@ conn.close()
 #Totalt: 23 olika matvaruprodukter från 7 kategorier
 
 #Mathem mjölk
-searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/91-mjolk/', mathem, "l", mathem.name)
+searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/91-mjolk/', mathem, "l", "milk")
 
 #Mathem ägg
-searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/129-agg-jast/130-agg/', mathem, "st", mathem.name)
+searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/129-agg-jast/130-agg/', mathem, "st", "egg")
 
 #Mathem smör&margarin
-searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/113-smor-margarin/114-bordsask-smor-margarin/', mathem, "kg", mathem.name)
+searchStore('https://www.mathem.se/se/categories/78-mejeri-ost-juice/113-smor-margarin/114-bordsask-smor-margarin/', mathem, "kg", "butter")
 
 #Mathem mjöl
-searchStore('https://www.mathem.se/se/categories/329-skafferi/354-mjol-bakning/356-vetemjol/', mathem, "kg", mathem.name)
+#searchStore('https://www.mathem.se/se/categories/329-skafferi/354-mjol-bakning/356-vetemjol/', mathem, "kg", "flour")
 
 #Willys ägg
-searchStore('https://www.willys.se/sortiment/mejeri-ost-och-agg/agg?q=%3AtopRated%3AproductLabelTypes%3ASWEDISH_FLAG', willys, "st", willys.name)
+#searchStore('https://www.willys.se/sortiment/mejeri-ost-och-agg/agg?q=%3AtopRated%3AproductLabelTypes%3ASWEDISH_FLAG', willys, "st", "egg")
 
 
 #mjöl

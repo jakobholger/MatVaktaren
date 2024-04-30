@@ -1,13 +1,14 @@
 Stre4K & JakobHolger WebScraper
 ==============================
 
-This project is a WebScraper based in Python.
+### Description of project
+This project is a WebScraper based in Python to gain insight into the change in price for food sold by different companies. It is not finished and still work in progress.
 
 ## How to use
 
 1. Clone the repository
 ```
-git clone https://github.com/Str4k/Python-WebScraper.git
+git clone https://github.com/jakobholger/WebscraperMat.git
 ```
 2. Navigate to the cloned directory
 ```

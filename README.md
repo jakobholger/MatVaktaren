@@ -19,8 +19,13 @@ cd WebscrapeMat
 python3 -m venv venv
 ```
 4. Activate the virtual environment
+MACOS
 ```
 source venv/bin/activate
+```
+WINDOWS
+```
+venv\Scripts\activate.bat
 ```
 5. Install requirements
 ```

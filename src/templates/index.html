@@ -19,11 +19,6 @@
         </thead>
         <tbody>
             <tr class="">
-                <td>{{ stock_balance }}</td>
-                <td>{{ session["cash"] }}</td>
-                <td>{{ total_balance }}</td>
-                <td class="{{ 'sell' if overall_development.value < 0 else 'buy' }}">${{ overall_development.value }}</td>
-                <td class="{{ 'sell' if overall_development.percentage < 0 else 'buy' }}">{{ overall_development.percentage }}%</td>
                 <!-- Add more data fields as needed -->
             </tr>
         </tbody>
@@ -41,18 +36,5 @@
                 <!-- Add more headers as needed -->
             </tr>
         </thead>
-        <tbody>
-            {% for stock in stocks %}
-                <tr class="{% if stock.development_percentage > 0 %}buy{% elif stock.development_percentage < 0 %}sell{% else %}{% endif %}">
-                    <td>{{ stock.symbol }}</td>
-                    <td>{{ stock.net_holdings }}</td>
-                    <td>{{ stock.price_per_stock }}</td>
-                    <td>{{ stock.price_total }}</td>
-                    <td>{{ stock.development_value }}</td>
-                    <td>{{ stock.development_percentage }}</td>
-                    <!-- Add more data fields as needed -->
-                </tr>
-            {% endfor %}
-        </tbody>
     </table>
 {% endblock %}

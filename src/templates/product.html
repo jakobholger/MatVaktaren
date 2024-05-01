@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Product
+{% endblock %}
+
+{% block main %}
+<tbody>
+    {% for item in web %}
+    <tr>
+        <td>{{ item.weight }}</td>
+    </tr>
+{% endfor %}
+</tbody>
+{% endblock %}

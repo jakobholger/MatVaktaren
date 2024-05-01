@@ -22,6 +22,8 @@ Session(app)
 # Configure CS50 Library to use SQLite database
 db = SQL("sqlite:///finance.db")
 
+dbWeb = SQL("sqlite:///../webscraper/products.db")
+
 
 @app.after_request
 def after_request(response):
@@ -36,16 +38,6 @@ def after_request(response):
 @login_required
 def index():
     return render_template("index.html")
-
-
-@app.route("/history")
-@login_required
-def history():
-    """Show history of transactions"""
-    transactions = db.execute("SELECT * FROM transactions WHERE user_id = ? ORDER BY transacted_at DESC;", session["user_id"])
-    for transaction in transactions:
-        transaction['price_total'] = transaction['shares'] * transaction['price']
-    return render_template("history.html", transactions=transactions)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -83,6 +75,18 @@ def login():
     else:
         return render_template("login.html")
 
+@app.route("/product")
+def product():
+    print("Product: ")
+    products = dbWeb.execute("SELECT * FROM products")
+    for row in products:
+        print(row)
+
+    print("\nPrice History:")
+    prices = dbWeb.execute("SELECT * FROM price_history")
+    for row in prices:
+        print(row)
+    return render_template('product.html', products=products, prices=prices)
 
 @app.route("/logout")
 def logout():

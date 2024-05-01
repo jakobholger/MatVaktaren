@@ -77,16 +77,30 @@ def login():
 
 @app.route("/product")
 def product():
-    print("Product: ")
-    products = dbWeb.execute("SELECT * FROM products")
-    for row in products:
-        print(row)
 
-    print("\nPrice History:")
+    products = dbWeb.execute("SELECT * FROM products")
+
     prices = dbWeb.execute("SELECT * FROM price_history")
-    for row in prices:
-        print(row)
-    return render_template('product.html', products=products, price_history=prices)
+
+    df = pd.DataFrame(prices)
+    
+    fig = px.line(df, x='pushed_date', y='price', labels={'price': 'price'}, title=f'{"Productname"} Product Price Over Time')
+
+    fig.update_layout(
+        autosize=True,
+        margin=dict(l=10, r=10, t=70, b=10),
+        paper_bgcolor="#212529",
+        plot_bgcolor="#37414e",
+        font=dict(color='white'),  # Set the color of all text to white
+        title=dict(font=dict(color='white')),  # Set the color of the title text to white
+        xaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the x-axis title text to white
+        yaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the y-axis title text to white
+        legend=dict(title=dict(font=dict(color='white')), font=dict(color='white')),  # Set the color of legend text to white
+    )
+
+    graph_json = fig.to_json()
+    
+    return render_template('product.html', graph_json=graph_json, products=products, price_history=prices)
 
 @app.route("/logout")
 def logout():

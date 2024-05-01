@@ -15,3 +15,4 @@ TODO LIST
 - [ ] Utilize Flask-SQLAlchemy
 - [ ] Utilize pandas or equvalent
 - [ ] Utilize plotly
+- [ ] Test and deploy to cloud

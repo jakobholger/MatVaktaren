@@ -5,15 +5,19 @@ from datetime import datetime
 def add_price_for_product(product_name, price, pushed_date, unit, product_code):
     product_id = get_product_id(product_code)
     if product_id is not None:
+        
+        if check_exists_for_current_date(product_id, pushed_date):
 
-        conn = sqlite3.connect('products.db')
-        cursor = conn.cursor()
+            conn = sqlite3.connect('products.db')
+            cursor = conn.cursor()
 
-        cursor.execute('''INSERT INTO price_history (product_id, price, pushed_date, unit)
+            cursor.execute('''INSERT INTO price_history (product_id, price, pushed_date, unit)
                       VALUES (?, ?, ?, ?)''', (product_id, price, pushed_date, unit))
 
-        conn.commit()
-        conn.close()
+            conn.commit()
+            conn.close()
+        else:
+            print("Price has already been pushed today.")
     else:
         print(f"Product '{product_name}' not found.")
 
@@ -67,6 +71,18 @@ def print_all_records():
         print(row)
 
     conn.close()
+
+def check_exists_for_current_date(product_id, pushed_date):
+        conn = sqlite3.connect('products.db')
+        cursor = conn.cursor()
+        cursor.execute(''' SELECT * FROM price_history WHERE product_id = ? AND pushed_date = ?''', (product_id, pushed_date) )
+
+        # If any rows are returned, it means there's a match
+        rows = cursor.fetchall()
+        conn.close()
+        if len(rows)>0:
+            return False
+        return True
 
 
 #Import in other python file

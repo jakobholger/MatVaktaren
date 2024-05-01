@@ -86,7 +86,7 @@ def product():
     prices = dbWeb.execute("SELECT * FROM price_history")
     for row in prices:
         print(row)
-    return render_template('product.html', products=products, prices=prices)
+    return render_template('product.html', products=products, price_history=prices)
 
 @app.route("/logout")
 def logout():

@@ -5,11 +5,52 @@
 {% endblock %}
 
 {% block main %}
-<tbody>
-    {% for item in web %}
-    <tr>
-        <td>{{ item.weight }}</td>
-    </tr>
-{% endfor %}
-</tbody>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Product Name</th>
+            <th>Weight</th>
+            <th>Category</th>
+            <th>Product Code</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.id }}</td>
+            <td>{{ product.product_name }}</td>
+            <td>{{ product.weight }}</td>
+            <td>{{ product.category }}</td>
+            <td>{{ product.product_code }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<hr> <!-- Add a horizontal line to visually separate products and price history -->
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Product ID</th>
+            <th>Price</th>
+            <th>Unit</th>
+            <th>Pushed Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in price_history %}
+        <tr>
+            <td>{{ item.id }}</td>
+            <td>{{ item.product_id }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.unit }}</td>
+            <td>{{ item.pushed_date }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

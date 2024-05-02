@@ -99,8 +99,8 @@ def product():
     # Connect to DB
     cursor = get_db().cursor()
 
-    products = cursor.execute("SELECT * FROM products")
-    prices = cursor.execute("SELECT * FROM price_history")
+    products = cursor.execute("SELECT * FROM products").fetchall()
+    prices = cursor.execute("SELECT * FROM price_history").fetchall()
 
     if not prices or not products:
         return apology("no products found", 400)

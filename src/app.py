@@ -28,7 +28,10 @@ configure_database(app.config['DATABASE'])
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
-        db = g._database = sqlite3.connect(app.config['DATABASE'])
+        db = g._database = sqlite3.connect(
+            app.config['DATABASE'],
+            detect_types=sqlite3.PARSE_DECLTYPES
+        )
         db.row_factory = sqlite3.Row
     return db
 
@@ -99,13 +102,25 @@ def product():
     # Connect to DB
     cursor = get_db().cursor()
 
+    # Query database for products and prices
     products = cursor.execute("SELECT * FROM products").fetchall()
-    prices = cursor.execute("SELECT * FROM price_history").fetchall()
+    priceHistory = cursor.execute("SELECT * FROM price_history").fetchall()
 
-    if not prices or not products:
+    # Ensure Data was note empty
+    if not priceHistory or not products:
         return apology("no products found", 400)
 
-    df = pd.DataFrame(prices)
+    # Return dictionarie with data of products
+    dataProducts = []
+    for product in products:
+        dataProducts.append(dict(product))
+
+    # Return dictionarie with data of price_history
+    dataPriceHistory = []
+    for row in priceHistory:
+        dataPriceHistory.append(dict(row))
+
+    df = pd.DataFrame(dataPriceHistory)
 
     fig = px.line(df, x='pushed_date', y='price', labels={'price': 'price'}, title=f'{"Productname"} Product Price Over Time')
 
@@ -123,7 +138,7 @@ def product():
 
     graph_json = fig.to_json()
 
-    return render_template('product.html', graph_json=graph_json, products=products, price_history=prices)
+    return render_template('product.html', graph_json=graph_json, products=products, price_history=priceHistory)
 
 @app.route("/logout")
 def logout():

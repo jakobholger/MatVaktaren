@@ -160,7 +160,7 @@ def product():
 
     df = pd.DataFrame(dataPriceHistory)
 
-    fig = px.line(df, x='pushed_date', y='price', labels={'price': 'price'}, title=f'{"Productname"} Product Price Over Time')
+    fig = px.bar(df, x='product_id', y='price', labels={'price': 'price'}, title=f'{"Productname"} Product Price Over Time')
 
     fig.update_layout(
         autosize=True,

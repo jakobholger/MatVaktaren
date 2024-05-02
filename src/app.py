@@ -97,10 +97,10 @@ def login():
 def product():
 
     # Connect to DB
-    db = get_db()
+    cursor = get_db().cursor()
 
-    products = db.execute("SELECT * FROM products").fetchall()
-    prices = db.execute("SELECT * FROM price_history").fetchall()
+    products = cursor.execute("SELECT * FROM products")
+    prices = cursor.execute("SELECT * FROM price_history")
 
     if not prices or not products:
         return apology("no products found", 400)

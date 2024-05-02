@@ -105,8 +105,7 @@ def product_page(product_code):
     # Query database for products and prices
     product = cursor.execute("SELECT * FROM products WHERE product_code = ?", (product_code,)).fetchone()
     if product:
-        product_id = product['id']
-        priceHistory = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product_id,)).fetchall()
+        priceHistory = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
 
     # Return dictionarie with data of price_history
     dataPriceHistory = []
@@ -160,7 +159,7 @@ def product():
 
     df = pd.DataFrame(dataPriceHistory)
 
-    fig = px.bar(df, x='product_id', y='price', labels={'price': 'price'}, title=f'{"Productname"} Product Price Over Time')
+    fig = px.bar(df, x='product_id', y='price', labels={'price': 'price (kr)'}, title=f'{"Products"} Product Price Over Time')
 
     fig.update_layout(
         autosize=True,

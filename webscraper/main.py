@@ -3,33 +3,6 @@ import json
 import sqlite3
 from scraperFunction import scrape
 
-# Connect to SQLite database
-conn = sqlite3.connect('products.db')
-
-# Create a cursor object
-cursor = conn.cursor()
-
-# Create the products table if not exists
-cursor.execute('''CREATE TABLE IF NOT EXISTS products (
-                    id INTEGER PRIMARY KEY,
-                    product_name TEXT,
-                    weight TEXT,
-                    category TEXT,
-                    product_code TEXT
-                )''')
-
-# Create the price history table if not exists
-cursor.execute('''CREATE TABLE IF NOT EXISTS price_history (
-                    id INTEGER PRIMARY KEY,
-                    product_id INTEGER,
-                    price REAL,
-                    unit TEXT,
-                    pushed_date DATE,
-                    FOREIGN KEY (product_id) REFERENCES products(id)
-                )''')
-conn.commit()
-conn.close()
-
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
 }

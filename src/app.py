@@ -1,5 +1,4 @@
-from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session
+from flask import Flask, flash, redirect, render_template, request, session, g
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -8,22 +7,36 @@ from helpers import apology, login_required
 import pandas as pd
 import plotly.express as px
 from datetime import datetime, timedelta
-import pandas_market_calendars as mcal
 
+import sqlite3
 
 # Configure application
 app = Flask(__name__)
 
+# DB File configure
+from dbConfig import configure_database
+
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["DATABASE"] = "site.db"
 Session(app)
 
-# Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///finance.db")
+# Configure Database if not setup
+configure_database(app.config['DATABASE'])
 
-dbWeb = SQL("sqlite:///../webscraper/products.db")
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(app.config['DATABASE'])
+        db.row_factory = sqlite3.Row
+    return db
 
+@app.teardown_appcontext
+def close_db(exception=None):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 
 @app.after_request
 def after_request(response):
@@ -58,11 +71,16 @@ def login():
         elif not request.form.get("password"):
             return apology("must provide password", 400)
 
+        # Connect to DB
+        cursor = get_db().cursor()
+        username = request.form.get("username")
+        password = request.form.get("password")
+
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
+        rows = cursor.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchall()
 
         # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
             return apology("invalid username and/or password", 400)
 
         # Remember which user has logged in
@@ -78,12 +96,17 @@ def login():
 @app.route("/product")
 def product():
 
-    products = dbWeb.execute("SELECT * FROM products")
+    # Connect to DB
+    db = get_db()
 
-    prices = dbWeb.execute("SELECT * FROM price_history")
+    products = db.execute("SELECT * FROM products").fetchall()
+    prices = db.execute("SELECT * FROM price_history").fetchall()
+
+    if not prices or not products:
+        return apology("no products found", 400)
 
     df = pd.DataFrame(prices)
-    
+
     fig = px.line(df, x='pushed_date', y='price', labels={'price': 'price'}, title=f'{"Productname"} Product Price Over Time')
 
     fig.update_layout(
@@ -99,7 +122,7 @@ def product():
     )
 
     graph_json = fig.to_json()
-    
+
     return render_template('product.html', graph_json=graph_json, products=products, price_history=prices)
 
 @app.route("/logout")
@@ -150,35 +173,57 @@ def register():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
+        # Field input website
+        username = request.form.get("username")
+        password = request.form.get("password")
+        confirmation = request.form.get("confirmation")
+
         # Ensure username was submitted
-        if not request.form.get("username"):
+        if not username:
             return apology("must provide username", 400)
 
         # Ensure password was submitted
-        elif not request.form.get("password"):
+        elif not password:
             return apology("must provide password", 400)
 
         # Ensure password was submitted
-        elif not request.form.get("confirmation"):
+        elif not confirmation:
             return apology("must provide repassword", 400)
 
-        elif not request.form.get("confirmation") == request.form.get("password"):
+        elif not confirmation == password:
             return apology("passwords does not match", 400)
 
-        # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
+        # DB Connect
+        cursor = get_db().cursor()
 
-        # Ensure username exists and password is correct
-        #   if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-        #       return apology("invalid username and/or password", 403)
+        # Query database for username
+        rows = cursor.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchall()
+
         if len(rows) == 1:
             return apology("Username already exists", 400)
 
-        db.execute("INSERT INTO users (username, hash) VALUES(?, ?)",
-                   request.form.get("username"), generate_password_hash(request.form.get("password")))
-        rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
-        # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
+        # Hash password
+        hashedPassword = generate_password_hash(password)
+
+        cursor.execute("INSERT INTO users (username, hash) VALUES(?, ?)",
+                   (username, hashedPassword))
+
+        # Commit changes
+        cursor.connection.commit()
+
+        row = cursor.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+
+        # Ensure that the query returned a row
+        if row is not None:
+            # Access the user's ID from the tuple using index 0
+            user_id = row["id"]
+            username = row["username"]
+            # Store the user ID in the session
+            session["user_id"] = user_id
+            session["username"] = username
+        else:
+            # Handle the case where the user was not found
+            return apology("Failed to fetch user information", 500)
 
         # Redirect user to home page
         return redirect("/")

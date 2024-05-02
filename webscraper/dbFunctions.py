@@ -1,14 +1,17 @@
 import sqlite3
 from datetime import datetime
 
+# Define Database File
+dbFile = '../src/site.db'
+
 # Function to add a new price for an existing product
 def add_price_for_product(product_name, price, pushed_date, unit, product_code):
     product_id = get_product_id(product_code)
     if product_id is not None:
-        
+
         if check_exists_for_current_date(product_id, pushed_date):
 
-            conn = sqlite3.connect('products.db')
+            conn = sqlite3.connect(dbFile)
             cursor = conn.cursor()
 
             cursor.execute('''INSERT INTO price_history (product_id, price, pushed_date, unit)
@@ -23,7 +26,7 @@ def add_price_for_product(product_name, price, pushed_date, unit, product_code):
 
 # Function to create a new product in the products table
 def create_product(product_name, weight, product_code, category):
-    conn = sqlite3.connect('products.db')
+    conn = sqlite3.connect(dbFile)
     cursor = conn.cursor()
 
     product_id = get_product_id(product_code)
@@ -41,7 +44,7 @@ def create_product(product_name, weight, product_code, category):
 
 # Function to fetch the product_id based on the product name and store name
 def get_product_id(product_code):
-    conn = sqlite3.connect('products.db')
+    conn = sqlite3.connect(dbFile)
     cursor = conn.cursor()
 
     # Execute a SELECT query to retrieve the product_id
@@ -55,7 +58,7 @@ def get_product_id(product_code):
 
 # Function to query and print all records from the database
 def print_all_records():
-    conn = sqlite3.connect('products.db')
+    conn = sqlite3.connect(dbFile)
     cursor = conn.cursor()
 
     # Query and print all records from the products table
@@ -73,7 +76,7 @@ def print_all_records():
     conn.close()
 
 def check_exists_for_current_date(product_id, pushed_date):
-        conn = sqlite3.connect('products.db')
+        conn = sqlite3.connect(dbFile)
         cursor = conn.cursor()
         cursor.execute(''' SELECT * FROM price_history WHERE product_id = ? AND pushed_date = ?''', (product_id, pushed_date) )
 

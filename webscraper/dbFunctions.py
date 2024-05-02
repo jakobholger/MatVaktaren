@@ -5,17 +5,18 @@ from datetime import datetime
 dbFile = '../src/site.db'
 
 # Function to add a new price for an existing product
-def add_price_for_product(product_name, price, pushed_date, unit, product_code):
+def add_price_for_product(product_name, price, currency, pushed_date, unit, product_code):
     product_id = get_product_id(product_code)
     if product_id is not None:
 
         if check_exists_for_current_date(product_id, pushed_date):
 
+            # Connect to the database
             conn = sqlite3.connect(dbFile)
             cursor = conn.cursor()
 
-            cursor.execute('''INSERT INTO price_history (product_id, price, pushed_date, unit)
-                      VALUES (?, ?, ?, ?)''', (product_id, price, pushed_date, unit))
+            cursor.execute('''INSERT INTO price_history (product_id, price, currency, pushed_date, unit)
+                      VALUES (?, ?, ?, ?, ?)''', (product_id, price, currency, pushed_date, unit))
 
             conn.commit()
             conn.close()

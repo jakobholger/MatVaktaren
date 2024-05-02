@@ -95,6 +95,44 @@ def login():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
+    
+# Define your route for the product page
+@app.route('/product/<product_code>')
+def product_page(product_code):
+    # Connect to DB
+    cursor = get_db().cursor()
+
+    # Query database for products and prices
+    product = cursor.execute("SELECT * FROM products WHERE product_code = ?", (product_code,)).fetchone()
+    if product:
+        product_id = product['id']
+        priceHistory = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product_id,)).fetchall()
+
+    # Return dictionarie with data of price_history
+    dataPriceHistory = []
+    for row in priceHistory:
+        dataPriceHistory.append(dict(row))
+
+    df = pd.DataFrame(dataPriceHistory)
+
+    fig = px.line(df, x='pushed_date', y='price', labels={'price': 'price'}, title=f'{dict(product)['product_name']} Product Price Over Time')
+
+    fig.update_layout(
+        autosize=True,
+        margin=dict(l=10, r=10, t=70, b=10),
+        paper_bgcolor="#212529",
+        plot_bgcolor="#37414e",
+        font=dict(color='white'),  # Set the color of all text to white
+        title=dict(font=dict(color='white')),  # Set the color of the title text to white
+        xaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the x-axis title text to white
+        yaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the y-axis title text to white
+        legend=dict(title=dict(font=dict(color='white')), font=dict(color='white')),  # Set the color of legend text to white
+    )
+
+    graph_json = fig.to_json()
+
+    # and render the corresponding template
+    return render_template('specificProduct.html', graph_json=graph_json, product=product, )
 
 @app.route("/product")
 def product():

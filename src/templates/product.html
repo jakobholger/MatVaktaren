@@ -28,7 +28,7 @@
         {% for product in products %}
         <tr>
             <td>{{ product.id }}</td>
-            <td>{{ product.product_name }}</td>
+            <td><a href="/product/{{ product.product_code }}">{{ product.product_name }}</a></td>
             <td>{{ product.weight }}</td>
             <td>{{ product.category }}</td>
             <td>{{ product.product_code }}</td>

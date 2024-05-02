@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{product.product_name}}
+{% endblock %}
+
+{% block main %}
+
+<td><a href="/product">Go back</a></td>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<div id="plotly-graph"></div>
+<script>
+    // Parse the Plotly JSON and display the graph
+    var graphJson = {{ graph_json|safe }};
+    Plotly.newPlot('plotly-graph', graphJson.data, graphJson.layout);
+</script>
+{% endblock %}

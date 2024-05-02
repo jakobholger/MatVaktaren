@@ -1,3 +1,3 @@
-from scrape.dbFunctions import print_all_records
+from dbFunctions import print_all_records
 
 print_all_records()

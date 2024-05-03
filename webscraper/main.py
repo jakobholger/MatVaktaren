@@ -29,6 +29,8 @@ products = ['101145716_ST', '101523778_ST', '101248845_ST', '101243524_ST',
             '101250980_ST', '101250927_ST', '101250964_ST', '101235685_ST',
             '101219084_ST', '101252646_ST', '101197249_ST', '101545428_ST',
             '101544931_ST', '101288362_ST', '101179861_ST', '101283040_ST' ]
-
+total_sum = 0
 for product in products:
-    scrape(product)
+    scraped_data = scrape(product)
+    total_sum += float(scraped_data)
+print(total_sum)

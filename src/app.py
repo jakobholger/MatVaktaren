@@ -244,7 +244,7 @@ def product():
 
     df = pd.DataFrame(dataPriceHistory)
 
-    fig = px.bar(df, x='name', y='price', labels={'price': 'price (kr)'}, title=f'{"Products"} Price Over Time')
+    fig = px.box(df, x='name', y='price', labels={'price': 'price (kr)'}, title=f'{"Products"} Price Over Time')
 
     fig.update_layout(
         autosize=True,

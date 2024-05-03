@@ -139,8 +139,14 @@ def product_page(product_code):
     # and render the corresponding template
     return render_template('specificProduct.html', graph_json=graph_json, product=product, price_history=priceHistory)
 
-@app.route('/products/category/<category>')
+@app.route('/products/category/<category>', methods=['GET', 'POST'])
 def category(category):
+    if request.method == 'POST':
+        # Get the selected category from the form
+        selected_category = request.form['category']
+        # Redirect to a new route with the selected category as parameter
+        return redirect(url_for('category', category=selected_category))
+
     # Connect to DB
     cursor = get_db().cursor()
 

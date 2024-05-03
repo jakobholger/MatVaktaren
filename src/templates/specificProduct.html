@@ -6,7 +6,7 @@
 
 {% block main %}
 
-<td><a href="/product">Go back</a></td>
+<td><a href="/products"><h4>Go back</h4></a></td>
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <div id="plotly-graph"></div>
@@ -15,4 +15,27 @@
     var graphJson = {{ graph_json|safe }};
     Plotly.newPlot('plotly-graph', graphJson.data, graphJson.layout);
 </script>
+
+<hr>
+
+<h1>{{product.product_name}}</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Pushed Date</th>
+            <th>Price (kr)</th>
+            <th>Unit</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in price_history %}
+        <tr>
+            <td>{{ item.pushed_date }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.unit }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 {% endblock %}

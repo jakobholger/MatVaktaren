@@ -1,4 +1,4 @@
-from flask import Flask, flash, redirect, render_template, request, session, g
+from flask import Flask, flash, redirect, render_template, request, session, g, url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -90,14 +90,14 @@ def login():
         session["user_id"] = rows[0]["id"]
         session['username'] = rows[0]["username"]
         # Redirect user to home page
-        return redirect("/")
+        return redirect("/products")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
     
 # Define your route for the product page
-@app.route('/product/<product_code>')
+@app.route('/products/<product_code>')
 def product_page(product_code):
     # Connect to DB
     cursor = get_db().cursor()
@@ -107,14 +107,20 @@ def product_page(product_code):
     if product:
         priceHistory = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
 
+
     # Return dictionarie with data of price_history
     dataPriceHistory = []
     for row in priceHistory:
         dataPriceHistory.append(dict(row))
 
+    for dictionary in dataPriceHistory:
+        if 'pushed_date' in dictionary:
+            value = dictionary.pop('pushed_date')
+            dictionary['date'] = value
+
     df = pd.DataFrame(dataPriceHistory)
 
-    fig = px.line(df, x='pushed_date', y='price', labels={'price': 'price'}, title=f'{dict(product)['product_name']} Product Price Over Time')
+    fig = px.line(df, x='date', y='price', labels={'price': 'price'}, title=f'{dict(product)['product_name']} Price Over Time')
 
     fig.update_layout(
         autosize=True,
@@ -131,11 +137,76 @@ def product_page(product_code):
     graph_json = fig.to_json()
 
     # and render the corresponding template
-    return render_template('specificProduct.html', graph_json=graph_json, product=product, )
+    return render_template('specificProduct.html', graph_json=graph_json, product=product, price_history=priceHistory)
 
-@app.route("/product")
+@app.route('/products/category/<category>')
+def category(category):
+    # Connect to DB
+    cursor = get_db().cursor()
+
+    # Query database for products where the category column contains the specified category
+    query = "SELECT * FROM products WHERE category LIKE ?"
+    products = cursor.execute(query, ('%' + category + '%',)).fetchall()
+
+    # Ensure products were found
+    if not products:
+        return apology("No products found in the specified category", 400)
+
+    # Fetch price history for each product
+    price_history = []
+    for product in products:
+        history = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
+        price_history.extend(history)
+
+    # Ensure price history was found
+    if not price_history:
+        return apology("No price history found for the products in the specified category", 400)
+
+    # Convert fetched data into dictionaries
+    data_products = [dict(product) for product in products]
+    data_price_history = [dict(row) for row in price_history]
+
+    # Assign product names to price history data
+    for d in data_price_history:
+        product_id = d['product_id']
+        for item in data_products:
+            if item['id'] == product_id:
+                d['name'] = item['product_name']
+
+    # Create DataFrame from price history data
+    df = pd.DataFrame(data_price_history)
+
+    # Plot graph using Plotly Express
+    fig = px.bar(df, x='name', y='price', labels={'price': 'price (kr)'}, title=f'Products Price Over Time')
+
+    # Update layout
+    fig.update_layout(
+        autosize=True,
+        margin=dict(l=10, r=10, t=70, b=10),
+        paper_bgcolor="#212529",
+        plot_bgcolor="#37414e",
+        font=dict(color='white', size=9),  # Set font color and size
+        title=dict(font=dict(color='white')),  # Set title font color
+        xaxis=dict(title=dict(font=dict(color='white')), tickangle=45),  # Set x-axis font color and tick angle
+        yaxis=dict(title=dict(font=dict(color='white'))),  # Set y-axis font color
+        legend=dict(title=dict(font=dict(color='white')), font=dict(color='white')),  # Set legend font color
+    )
+
+    # Convert figure to JSON
+    graph_json = fig.to_json()
+
+    return render_template('category.html', graph_json=graph_json, products=products, price_history=data_price_history)
+
+
+
+@app.route("/products", methods=['GET', 'POST'])
 def product():
-
+    if request.method == 'POST':
+        # Get the selected category from the form
+        selected_category = request.form['category']
+        # Redirect to a new route with the selected category as parameter
+        return redirect(url_for('category', category=selected_category))
+    
     # Connect to DB
     cursor = get_db().cursor()
 
@@ -157,25 +228,33 @@ def product():
     for row in priceHistory:
         dataPriceHistory.append(dict(row))
 
+    # Names for the graphs
+    for d in dataPriceHistory:
+        product_id = d['product_id']
+        for item in dataProducts:
+            if item['id'] == product_id:
+                d['name'] = item['product_name']
+
+
     df = pd.DataFrame(dataPriceHistory)
 
-    fig = px.bar(df, x='product_id', y='price', labels={'price': 'price (kr)'}, title=f'{"Products"} Product Price Over Time')
+    fig = px.bar(df, x='name', y='price', labels={'price': 'price (kr)'}, title=f'{"Products"} Price Over Time')
 
     fig.update_layout(
         autosize=True,
         margin=dict(l=10, r=10, t=70, b=10),
         paper_bgcolor="#212529",
         plot_bgcolor="#37414e",
-        font=dict(color='white'),  # Set the color of all text to white
+        font=dict(color='white', size = 9),  # Set the color of all text to white
         title=dict(font=dict(color='white')),  # Set the color of the title text to white
-        xaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the x-axis title text to white
+        xaxis=dict(title=dict(font=dict(color='white')), tickangle = 45),  # Set the color of the x-axis title text to white
         yaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the y-axis title text to white
         legend=dict(title=dict(font=dict(color='white')), font=dict(color='white')),  # Set the color of legend text to white
     )
 
     graph_json = fig.to_json()
 
-    return render_template('product.html', graph_json=graph_json, products=products, price_history=priceHistory)
+    return render_template('products.html', graph_json=graph_json, products=products, price_history=priceHistory)
 
 @app.route("/logout")
 def logout():

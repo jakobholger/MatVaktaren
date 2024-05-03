@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Product List
+{% endblock %}
+
+{% block main %}
+
+
+<h1>Show by category</h1>
+<form id="category-form", method="post">
+    <label for="category-select">Select a category:</label>
+    <select id="category-select" name="category">
+        <option value="skafferi">Skafferi</option>
+        <option value="mejeri-ost-och-agg">Mejeri ost och ägg</option>
+        <option value="frukt-och-gront">Frukt och grönt</option>
+        <option value="kott-chark-och-fagel">Kött chark och fågel</option>
+        <option value="fisk-och-skaldjur">Fisk och skaldjur</option>
+        <option value="fardigmat">Färdigmat</option>
+        <option value="dryck">Dryck</option>
+        <option value="glass-godis-och-snacks">Glass godis och snacks</option>
+    </select>
+    <input type="submit" value="Submit">
+</form>
+
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<div id="plotly-graph"></div>
+<script>
+    // Parse the Plotly JSON and display the graph
+    var graphJson = {{ graph_json|safe }};
+    Plotly.newPlot('plotly-graph', graphJson.data, graphJson.layout);
+</script>
+
+<hr>
+
+<div style="overflow-x: auto; display: flex;">
+    <div style="flex: 1;">
+        <!-- Table 1: Products -->
+        <div style="height: 300px; overflow-y: auto; margin-right: 5px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product Name</th>
+                        <th>Weight</th>
+                        <th>Category</th>
+                        <th>Product Code</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.id }}</td>
+                        <td><a href="/products/{{ product.product_code }}">{{ product.product_name }}</a></td>
+                        <td>{{ product.weight }}</td>
+                        <td>{{ product.category }}</td>
+                        <td>{{ product.product_code }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="flex: 1;">
+        <!-- Table 2: Price History -->
+        <div style="height: 300px; overflow-y: auto; margin-left: 5px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Product ID</th>
+                        <th>Price</th>
+                        <th>Unit</th>
+                        <th>Pushed Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in price_history %}
+                    <tr>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.product_id }}</td>
+                        <td>{{ item.price }}</td>
+                        <td>{{ item.unit }}</td>
+                        <td>{{ item.pushed_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

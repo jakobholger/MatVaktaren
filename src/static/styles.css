@@ -52,6 +52,8 @@ nav .navbar-brand .green
   }
 
   table {
+    height: 300px;
+    overflow: auto;
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;

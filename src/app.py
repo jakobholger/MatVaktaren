@@ -104,19 +104,60 @@ def product_page(product_code):
 
     # Query database for products and prices
     product = cursor.execute("SELECT * FROM products WHERE product_code = ?", (product_code,)).fetchone()
-    if product:
-        priceHistory = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
+    priceHistory = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
 
+    # Find all-time high and all-time low prices
+    all_time_high = max(row['price'] for row in priceHistory)
+    all_time_low = min(row['price'] for row in priceHistory)
+
+    # Calculate average price
+    average_price = round(sum(row['price'] for row in priceHistory) / len(priceHistory),2)
+
+    # Calculate the dates for different time periods
+    seven_days_ago = datetime.now().date() + timedelta(days=1)
+    fourteen_days_ago = datetime.now().date()
+    thirty_days_ago = datetime.now().date() - timedelta(days=1)
+
+    current_price = None
+    price_7_days_ago = None
+    price_14_days_ago = None
+    price_30_days_ago = None
+
+    for row in priceHistory:
+        if row['date'] == datetime.now().date() + timedelta(days=2):
+            current_price = row['price']
+        if row['date'] == seven_days_ago:
+            price_7_days_ago = row['price']
+        if row['date'] == fourteen_days_ago:
+            price_14_days_ago = row['price']
+        if row['date'] == thirty_days_ago:
+            price_30_days_ago = row['price']
+
+    # Calculate price changes for different time periods
+    price_change_7_days = current_price - price_7_days_ago
+    price_percentage_7_days = round(float(((current_price-price_7_days_ago)/price_7_days_ago)),4)*100
+    price_changes_14_days = current_price - price_14_days_ago
+    price_percentage_14_days = round(float(((current_price-price_14_days_ago)/price_14_days_ago)),4)*100
+    price_changes_30_days = current_price - price_30_days_ago
+    price_percentage_30_days = round(float(((current_price-price_30_days_ago)/price_30_days_ago)),4)*100
+
+    # Create a dictionary with all the values
+    product_metrics = {
+        "all_time_high": all_time_high,
+        "all_time_low": all_time_low,
+        "average_price": average_price,
+        "price_change_7_days": price_change_7_days,
+        "price_percentage_7_days" : price_percentage_7_days,
+        "price_change_14_days": price_changes_14_days,
+        "price_percentage_14_days" : price_percentage_14_days,
+        "price_change_30_days": price_changes_30_days,
+        "price_percentage_30_days" : price_percentage_30_days
+    }
 
     # Return dictionarie with data of price_history
     dataPriceHistory = []
     for row in priceHistory:
         dataPriceHistory.append(dict(row))
-
-    for dictionary in dataPriceHistory:
-        if 'pushed_date' in dictionary:
-            value = dictionary.pop('pushed_date')
-            dictionary['date'] = value
 
     df = pd.DataFrame(dataPriceHistory)
 
@@ -137,7 +178,7 @@ def product_page(product_code):
     graph_json = fig.to_json()
 
     # and render the corresponding template
-    return render_template('specificProduct.html', graph_json=graph_json, product=product, price_history=priceHistory)
+    return render_template('specificProduct.html', graph_json=graph_json, product=product, price_history=priceHistory, product_metrics=product_metrics)
 
 @app.route('/products/category/<category>', methods=['GET', 'POST'])
 def category(category):
@@ -183,7 +224,7 @@ def category(category):
     df = pd.DataFrame(data_price_history)
 
     # Plot graph using Plotly Express
-    fig = px.bar(df, x='name', y='price', labels={'price': 'price (kr)'}, title=f'Products Price Over Time')
+    fig = px.box(df, x='name', y='price', labels={'price': 'price (kr)'}, title=f'Products Price Over Time')
 
     # Update layout
     fig.update_layout(
@@ -368,3 +409,6 @@ def register():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("register.html")
+    
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=3001)  # Run the app on all available network interfaces

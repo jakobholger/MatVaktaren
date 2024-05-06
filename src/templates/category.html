@@ -24,6 +24,25 @@
     <input type="submit" value="Show">
 </form>
 
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Retrieve the selected category from sessionStorage
+        var selectedCategory = sessionStorage.getItem('selectedCategory');
+        if (selectedCategory) {
+            // Set the selected category in the dropdown
+            document.getElementById('category-select').value = selectedCategory;
+        }
+
+        // Add event listener to the form submission
+        document.getElementById('category-form').addEventListener('submit', function(event) {
+            // Store the selected category in sessionStorage
+            var categorySelect = document.getElementById('category-select');
+            sessionStorage.setItem('selectedCategory', categorySelect.value);
+        });
+    });
+</script>
+
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <div id="plotly-graph"></div>
 <script>
@@ -83,7 +102,7 @@
                         <td>{{ item.product_id }}</td>
                         <td>{{ item.price }}</td>
                         <td>{{ item.unit }}</td>
-                        <td>{{ item.pushed_date }}</td>
+                        <td>{{ item.date }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

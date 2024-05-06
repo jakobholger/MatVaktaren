@@ -5,18 +5,18 @@ from datetime import datetime
 dbFile = '../src/site.db'
 
 # Function to add a new price for an existing product
-def add_price_for_product(product_name, price, currency, pushed_date, unit, product_code):
+def add_price_for_product(product_name, price, currency, date, unit, product_code):
     product_id = get_product_id(product_code)
     if product_id is not None:
 
-        if check_exists_for_current_date(product_id, pushed_date):
+        if check_exists_for_current_date(product_id, date):
 
             # Connect to the database
             conn = sqlite3.connect(dbFile)
             cursor = conn.cursor()
 
-            cursor.execute('''INSERT INTO price_history (product_id, price, currency, pushed_date, unit)
-                      VALUES (?, ?, ?, ?, ?)''', (product_id, price, currency, pushed_date, unit))
+            cursor.execute('''INSERT INTO price_history (product_id, price, currency, date, unit)
+                      VALUES (?, ?, ?, ?, ?)''', (product_id, price, currency, date, unit))
 
             conn.commit()
             conn.close()
@@ -74,12 +74,18 @@ def print_all_records():
     for row in cursor.fetchall():
         print(row)
 
+    # Query and print all records from the total_price table
+    print("\nTotal price History:")
+    cursor.execute('''SELECT * FROM total_price''')
+    for row in cursor.fetchall():
+        print(row)
+
     conn.close()
 
-def check_exists_for_current_date(product_id, pushed_date):
+def check_exists_for_current_date(product_id, date):
         conn = sqlite3.connect(dbFile)
         cursor = conn.cursor()
-        cursor.execute(''' SELECT * FROM price_history WHERE product_id = ? AND pushed_date = ?''', (product_id, pushed_date) )
+        cursor.execute(''' SELECT * FROM price_history WHERE product_id = ? AND date = ?''', (product_id, date) )
 
         # If any rows are returned, it means there's a match
         rows = cursor.fetchall()

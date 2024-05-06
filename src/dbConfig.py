@@ -21,7 +21,7 @@ def configure_database(dbFile):
             price NUMERIC,
             currency TEXT,
             unit TEXT,
-            pushed_date DATE,
+            date DATE,
             FOREIGN KEY (product_id) REFERENCES products(id)
         )''')
         db.execute('''CREATE TABLE users (
@@ -30,6 +30,12 @@ def configure_database(dbFile):
             hash TEXT NOT NULL,
             is_admin INTEGER DEFAULT 0
         )''')
+        db.execute('''CREATE TABLE total_price (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            value NUMERIC,
+            date DATE
+        )''')
+
 
         # Add unique index on username in users table
         db.execute('''CREATE UNIQUE INDEX username ON users (username)''')

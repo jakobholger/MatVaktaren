@@ -2,6 +2,7 @@ import requests
 import json
 import sqlite3
 from scraperFunction import scrape
+from datetime import datetime
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
@@ -29,8 +30,29 @@ products = ['101145716_ST', '101523778_ST', '101248845_ST', '101243524_ST',
             '101250980_ST', '101250927_ST', '101250964_ST', '101235685_ST',
             '101219084_ST', '101252646_ST', '101197249_ST', '101545428_ST',
             '101544931_ST', '101288362_ST', '101179861_ST', '101283040_ST' ]
-total_sum = 0
 for product in products:
-    scraped_data = scrape(product)
-    total_sum += float(scraped_data)
-print(total_sum)
+   scrape(product)
+
+# Create total price for all products
+current_date = datetime.now().strftime('%Y-%m-%d')
+
+conn = sqlite3.connect('../src/site.db')
+cursor = conn.cursor()
+
+item = cursor.execute('''SELECT * FROM total_price WHERE date = ?''', (current_date,)).fetchall()
+
+if len(item) == 0:
+    prices = cursor.execute('''SELECT * FROM price_history WHERE date = ?''', (current_date,)).fetchall()
+
+    total_sum = 0
+    for price in prices:
+        total_sum += price[2]
+
+    cursor.execute('''INSERT INTO total_price (value, date) VALUES (?, ?)''', (total_sum, current_date,))
+
+    conn.commit()
+    conn.close()
+    print('Total price created for:', current_date , ".")
+else:
+    print("Total price already exists for this day.")
+    conn.close()

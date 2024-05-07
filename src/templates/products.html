@@ -36,34 +36,41 @@
     });
 </script>
 
-
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<div id="plotly-graph1"></div>
-<script>
-    // Parse the Plotly JSON and display the graph
-    var graphJson = {{ graph_json|safe }};
-    Plotly.newPlot('plotly-graph1', graphJson.data, graphJson.layout);
-</script>
 <hr>
+
 <u><h2>Total price of all products</h2></u>
-<div id="plotly-graph2"></div>
-<script>
-    // Parse the Plotly JSON and display the graph
-    var graphJson2 = {{ graph2_json|safe }};
-    Plotly.newPlot('plotly-graph2', graphJson2.data, graphJson2.layout);
-</script>
+<div style="display: flex; width: 100%;">
+    <div style="flex: 1; width: 50%;">
+        <div id="plotly-graph1" style="height: fit-content; width: 50%;"></div>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+        <script>
+            // Parse the Plotly JSON and display the graph
+            var graphJson = {{ graph_json|safe }};
+            Plotly.newPlot('plotly-graph1', graphJson.data, graphJson.layout);
+        </script>
+    </div>
+
+    <div style="flex: 1; width: 50%;">
+        <div id="plotly-graph2" style="height: fit-content;"></div>
+        <script>
+            // Parse the Plotly JSON and display the graph
+            var graphJson2 = {{ graph2_json|safe }};
+            Plotly.newPlot('plotly-graph2', graphJson2.data, graphJson2.layout);
+        </script>
+    </div>
+</div>
+
+
+
+
+<hr>
+
 <u><h3>Statistics of total price / WORK IN PROGRESS</h3></u>
-<table>
+<table style="height: 1%;">
     <thead>
         <tr>
-            <th>All-time high (kr)</th>
-            <th>All-time low (kr)</th>
-            <th>Average price (kr)</th>
-            <th>Price change last 7 Days (kr)</th>
             <th>Price change last 7 Days (%)</th>
-            <th>Price change last 14 Days (kr)</th>
             <th>Price change last 14 Days (%)</th>
-            <th>Price change last 30 Days (kr)</th>
             <th>Price change last 30 Days (%)</th>
             <!--
             <th>Price change last 6 Months (kr)</th>
@@ -75,19 +82,11 @@
     </thead>
     <tbody>
         <tr>
-            <td>{{total_metrics.all_time_high}}</td>
-            <td>{{total_metrics.all_time_low}}</td>
-            <td>{{total_metrics.average_price}}</td>
-            <td>{{total_metrics.price_change_7_days}}</td>
-            <td>{{total_metrics.price_percentage_7_days}}</td>
-            <td>{{total_metrics.price_change_14_days}}</td>
-            <td>{{total_metrics.price_percentage_14_days}}</td>
-            <td>{{total_metrics.price_change_30_days}}</td>
-            <td>{{total_metrics.price_percentage_30_days}}</td>
+            <td style="color: {{ 'green' if total_metrics.price_percentage_7_days >= 0 else 'red' }}">{{total_metrics.price_percentage_7_days}}</td>
+            <td style="color: {{ 'green' if total_metrics.price_percentage_14_days >= 0 else 'red' }}">{{total_metrics.price_percentage_14_days}}</td>
+            <td style="color: {{ 'green' if total_metrics.price_percentage_30_days >= 0 else 'red' }}">{{total_metrics.price_percentage_30_days}}</td>
             <!--
-            <td>Price change last 6 Months (kr)</td>
             <td>Price change last 6 Months (%)</td>
-            <td>Price change last Year (kr)</td>
             <td>Price change last Year (%)</td>
             -->
         </tr>

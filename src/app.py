@@ -143,6 +143,7 @@ def product_page(product_code):
 
     # Create a dictionary with all the values
     product_metrics = {
+        "current_price": current_price,
         "all_time_high": all_time_high,
         "all_time_low": all_time_low,
         "average_price": average_price,
@@ -243,7 +244,6 @@ def category(category):
     graph_json = fig.to_json()
 
     return render_template('category.html', graph_json=graph_json, products=products, price_history=data_price_history)
-
 
 
 @app.route("/products", methods=['GET', 'POST'])

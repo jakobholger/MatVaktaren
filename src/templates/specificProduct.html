@@ -20,8 +20,13 @@
 
 <hr>
 
+<u><h3>Current price: {{product_metrics.current_price}} kr</h3></u>
+
+
+<hr>
+
 <u><h3>Statistics of product / WORK IN PROGRESS</h3></u>
-<table>
+<table style="height: 1%;">
     <thead>
         <tr>
             <th>All-time high (kr)</th>
@@ -46,12 +51,12 @@
             <td>{{product_metrics.all_time_high}}</td>
             <td>{{product_metrics.all_time_low}}</td>
             <td>{{product_metrics.average_price}}</td>
-            <td>{{product_metrics.price_change_7_days}}</td>
-            <td>{{product_metrics.price_percentage_7_days}}</td>
-            <td>{{product_metrics.price_change_14_days}}</td>
-            <td>{{product_metrics.price_percentage_14_days}}</td>
-            <td>{{product_metrics.price_change_30_days}}</td>
-            <td>{{product_metrics.price_percentage_30_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_change_7_days >= 0 else 'red' }}">{{product_metrics.price_change_7_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_percentage_7_days >= 0 else 'red' }}">{{product_metrics.price_percentage_7_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_change_14_days >= 0 else 'red' }}">{{product_metrics.price_change_14_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_percentage_14_days >= 0 else 'red' }}">{{product_metrics.price_percentage_14_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_change_30_days >= 0 else 'red' }}">{{product_metrics.price_change_30_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_percentage_30_days >= 0 else 'red' }}">{{product_metrics.price_percentage_30_days}}</td>
             <!--
             <td>Price change last 6 Months (kr)</td>
             <td>Price change last 6 Months (%)</td>

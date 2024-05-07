@@ -6,14 +6,14 @@ This project is a WebScraper based in Python to gain insight into the change in 
 
 ### Screenshots
 
-## Main products page
+### Main products page
 ![Screenshot 1](screenshots/Products1.png)
 
 ## Further down the page
 
 ![Screenshot 2](screenshots/Products2.png)
 
-# End of page
+## End of page
 
 ![Screenshot 3](screenshots/Products3.png)
 

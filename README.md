@@ -4,19 +4,18 @@ Stre4K & JakobHolger WebScraper
 ### Description of project
 This project is a WebScraper based in Python to gain insight into the change in price for food sold by different companies. It is not finished and still work in progress.
 
-## Screenshots
+### Screenshots
 
-#Main products page
+## Main products page
 ![Screenshot 1](screenshots/Products1.png)
 
-#Further down the page
+## Further down the page
 
 ![Screenshot 2](screenshots/Products2.png)
 
-#End of page
+# End of page
 
 ![Screenshot 3](screenshots/Products3.png)
-
 
 ## How to use
 

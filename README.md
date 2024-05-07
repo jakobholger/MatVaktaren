@@ -6,9 +6,14 @@ This project is a WebScraper based in Python to gain insight into the change in 
 
 ## Screenshots
 
-![Screenshot of Application](screenshots/Products1.png "This is a screenshot of the application's main interface")
+Main products page
+![Screenshot 1](screenshots/Products1.png)
+
+
 
 ![Screenshot 2](screenshots/Products2.png)
+
+
 
 ![Screenshot 3](screenshots/Products3.png)
 

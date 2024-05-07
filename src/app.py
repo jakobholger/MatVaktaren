@@ -202,7 +202,7 @@ def category(category):
     # Fetch price history for each product
     price_history = []
     for product in products:
-        history = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
+        history = cursor.execute("SELECT * FROM price_history WHERE product_id = ? AND date = ?", (product['id'], datetime.now().date(),)).fetchall()
         price_history.extend(history)
 
     # Ensure price history was found
@@ -224,7 +224,7 @@ def category(category):
     df = pd.DataFrame(data_price_history)
 
     # Plot graph using Plotly Express
-    fig = px.box(df, x='name', y='price', labels={'price': 'price (kr)'}, title=f'Products Price Over Time')
+    fig = px.bar(df, x='name', y='price', labels={'price': 'price (kr)'}, title=f'Products Price Over Time')
 
     # Update layout
     fig.update_layout(
@@ -259,9 +259,9 @@ def product():
 
     # Query database for products and prices
     products = cursor.execute("SELECT * FROM products").fetchall()
-    priceHistory = cursor.execute("SELECT * FROM price_history").fetchall()
+    priceHistory = cursor.execute("SELECT * FROM price_history WHERE date = ?", (datetime.now().date(),)).fetchall()
 
-    # Ensure Data was note empty
+    # Ensure Data was not empty
     if not priceHistory or not products:
         return apology("no products found", 400)
 
@@ -285,7 +285,7 @@ def product():
 
     df = pd.DataFrame(dataPriceHistory)
 
-    fig = px.box(df, x='name', y='price', labels={'price': 'price (kr)'}, title=f'{"Products"} Price Over Time')
+    fig = px.bar(df, x='name', y='price', labels={'price': 'price (kr)'}, title='Current price for products')
 
     fig.update_layout(
         autosize=True,
@@ -301,7 +301,85 @@ def product():
 
     graph_json = fig.to_json()
 
-    return render_template('products.html', graph_json=graph_json, products=products, price_history=priceHistory)
+
+    total_prices = cursor.execute("SELECT * FROM total_price").fetchall()
+
+        # Ensure Data was not empty
+    if not total_prices:
+        return apology("no total prices found", 400)
+    
+    total_prices_dic = []
+    for row in total_prices:
+        total_prices_dic.append(dict(row))
+
+
+        # Find all-time high and all-time low prices
+    all_time_high = max(row['value'] for row in total_prices)
+    all_time_low = min(row['value'] for row in total_prices)
+
+    # Calculate average price
+    average_price = round(sum(row['value'] for row in total_prices) / len(total_prices),2)
+
+    # Calculate the dates for different time periods
+    seven_days_ago = datetime.now().date() + timedelta(days=2)
+    fourteen_days_ago = datetime.now().date() + timedelta(days=1)
+    thirty_days_ago = datetime.now().date() + timedelta(days=0)
+
+    current_price = None
+    price_7_days_ago = None
+    price_14_days_ago = None
+    price_30_days_ago = None
+
+    for row in total_prices:
+        if row['date'] == datetime.now().date() + timedelta(days=3):
+            current_price = row['value']
+        if row['date'] == seven_days_ago:
+            price_7_days_ago = row['value']
+        if row['date'] == fourteen_days_ago:
+            price_14_days_ago = row['value']
+        if row['date'] == thirty_days_ago:
+            price_30_days_ago = row['value']
+
+    # Calculate price changes for different time periods
+    price_change_7_days = current_price - price_7_days_ago
+    price_percentage_7_days = round(float(((current_price-price_7_days_ago)/price_7_days_ago)),4)*100
+    price_changes_14_days = current_price - price_14_days_ago
+    price_percentage_14_days = round(float(((current_price-price_14_days_ago)/price_14_days_ago)),4)*100
+    price_changes_30_days = current_price - price_30_days_ago
+    price_percentage_30_days = round(float(((current_price-price_30_days_ago)/price_30_days_ago)),4)*100
+
+    # Create a dictionary with all the values
+    total_metrics = {
+        "all_time_high": all_time_high,
+        "all_time_low": all_time_low,
+        "average_price": average_price,
+        "price_change_7_days": price_change_7_days,
+        "price_percentage_7_days" : price_percentage_7_days,
+        "price_change_14_days": price_changes_14_days,
+        "price_percentage_14_days" : price_percentage_14_days,
+        "price_change_30_days": price_changes_30_days,
+        "price_percentage_30_days" : price_percentage_30_days
+    }
+
+    dataframe = pd.DataFrame(total_prices_dic)
+
+    fig2 = px.line(dataframe, x='date', y='value', labels={'price': 'price (kr)'}, title=f'{"Total"} Price Over Time')
+
+    fig2.update_layout(
+    autosize=True,
+    margin=dict(l=10, r=10, t=70, b=10),
+    paper_bgcolor="#212529",
+    plot_bgcolor="#37414e",
+    font=dict(color='white', size = 9),  # Set the color of all text to white
+    title=dict(font=dict(color='white')),  # Set the color of the title text to white
+    xaxis=dict(title=dict(font=dict(color='white')), tickangle = 45),  # Set the color of the x-axis title text to white
+    yaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the y-axis title text to white
+    legend=dict(title=dict(font=dict(color='white')), font=dict(color='white')),  # Set the color of legend text to white
+    )
+
+    graph2_json = fig2.to_json()
+
+    return render_template('products.html', graph_json=graph_json, graph2_json=graph2_json, products=products, price_history=priceHistory, total_metrics=total_metrics)
 
 @app.route("/logout")
 def logout():

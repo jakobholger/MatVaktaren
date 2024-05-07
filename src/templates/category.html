@@ -6,28 +6,10 @@
 
 {% block main %}
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Retrieve the selected category from sessionStorage
-        var selectedCategory = sessionStorage.getItem('selectedCategory');
-        if (selectedCategory) {
-            // Set the selected category in the dropdown
-            document.getElementById('category-select').value = selectedCategory;
-        }
-
-        // Add event listener to the form submission
-        document.getElementById('category-form').addEventListener('submit', function(event) {
-            // Store the selected category in sessionStorage
-            var categorySelect = document.getElementById('category-select');
-            sessionStorage.setItem('selectedCategory', categorySelect.value);
-        });
-    });
-</script>
-
 <td><a href="/products"><h4>Go back</h4></a></td>
 
 <h1>Show by category</h1>
-<form id="category-form", method="post">
+<form id="category-form" method="post">
     <label for="category-select">Select a category:</label>
     <select id="category-select" name="category">
         <option value="skafferi">Skafferi</option>
@@ -39,10 +21,31 @@
         <option value="dryck">Dryck</option>
         <option value="glass-godis-och-snacks">Glass godis och snacks</option>
     </select>
-    <input type="submit" value="Show">
+    <input type="submit" value="Show" style="display: none;"> <!-- Hidden submit button -->
 </form>
 
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('category-select').addEventListener('change', function() {
+        document.getElementById('category-form').submit(); // Submit the form when the select value changes
+        // Store the selected category in sessionStorage
+        var categorySelect = document.getElementById('category-select');
+        sessionStorage.setItem('selectedCategory', categorySelect.value);
+        });
+        
+        // Retrieve the selected category from sessionStorage
+        var selectedCategory = sessionStorage.getItem('selectedCategory');
+        if (selectedCategory) {
+            // Set the selected category in the dropdown
+            document.getElementById('category-select').value = selectedCategory;
+        }
+    window.addEventListener('beforeunload', function() {
+    localStorage.clear();
+});
+    });
+
+</script>
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <div id="plotly-graph"></div>

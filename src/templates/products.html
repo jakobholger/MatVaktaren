@@ -8,7 +8,7 @@
 
 
 <h1>Show by category</h1>
-<form id="category-form", method="post">
+<form id="category-form" method="post">
     <label for="category-select">Select a category:</label>
     <select id="category-select" name="category">
         <option value="skafferi">Skafferi</option>
@@ -20,35 +20,79 @@
         <option value="dryck">Dryck</option>
         <option value="glass-godis-och-snacks">Glass godis och snacks</option>
     </select>
-    <input type="submit" value="Show">
+    <input type="submit" value="Show" style="display: none;"> <!-- Hidden submit button -->
 </form>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('category-select').addEventListener('change', function() {
+        document.getElementById('category-form').submit(); // Submit the form when the select value changes
+        // Store the selected category in sessionStorage
+        var categorySelect = document.getElementById('category-select');
+        sessionStorage.setItem('selectedCategory', categorySelect.value);
+    });
         // Retrieve the selected category from sessionStorage
         var selectedCategory = sessionStorage.getItem('selectedCategory');
-        if (selectedCategory) {
-            // Set the selected category in the dropdown
-            document.getElementById('category-select').value = selectedCategory;
-        }
-
-        // Add event listener to the form submission
-        document.getElementById('category-form').addEventListener('submit', function(event) {
-            // Store the selected category in sessionStorage
-            var categorySelect = document.getElementById('category-select');
-            sessionStorage.setItem('selectedCategory', categorySelect.value);
-        });
     });
 </script>
 
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<div id="plotly-graph"></div>
+<div id="plotly-graph1"></div>
 <script>
     // Parse the Plotly JSON and display the graph
     var graphJson = {{ graph_json|safe }};
-    Plotly.newPlot('plotly-graph', graphJson.data, graphJson.layout);
+    Plotly.newPlot('plotly-graph1', graphJson.data, graphJson.layout);
 </script>
+<hr>
+<u><h2>Total price of all products</h2></u>
+<div id="plotly-graph2"></div>
+<script>
+    // Parse the Plotly JSON and display the graph
+    var graphJson2 = {{ graph2_json|safe }};
+    Plotly.newPlot('plotly-graph2', graphJson2.data, graphJson2.layout);
+</script>
+<u><h3>Statistics of total price / WORK IN PROGRESS</h3></u>
+<table>
+    <thead>
+        <tr>
+            <th>All-time high (kr)</th>
+            <th>All-time low (kr)</th>
+            <th>Average price (kr)</th>
+            <th>Price change last 7 Days (kr)</th>
+            <th>Price change last 7 Days (%)</th>
+            <th>Price change last 14 Days (kr)</th>
+            <th>Price change last 14 Days (%)</th>
+            <th>Price change last 30 Days (kr)</th>
+            <th>Price change last 30 Days (%)</th>
+            <!--
+            <th>Price change last 6 Months (kr)</th>
+            <th>Price change last 6 Months (%)</th>
+            <th>Price change last Year (kr)</th>
+            <th>Price change last Year (%)</th>
+            -->
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{total_metrics.all_time_high}}</td>
+            <td>{{total_metrics.all_time_low}}</td>
+            <td>{{total_metrics.average_price}}</td>
+            <td>{{total_metrics.price_change_7_days}}</td>
+            <td>{{total_metrics.price_percentage_7_days}}</td>
+            <td>{{total_metrics.price_change_14_days}}</td>
+            <td>{{total_metrics.price_percentage_14_days}}</td>
+            <td>{{total_metrics.price_change_30_days}}</td>
+            <td>{{total_metrics.price_percentage_30_days}}</td>
+            <!--
+            <td>Price change last 6 Months (kr)</td>
+            <td>Price change last 6 Months (%)</td>
+            <td>Price change last Year (kr)</td>
+            <td>Price change last Year (%)</td>
+            -->
+        </tr>
+    </tbody>
+</table>
 
 <hr>
 

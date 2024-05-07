@@ -114,9 +114,9 @@ def product_page(product_code):
     average_price = round(sum(row['price'] for row in priceHistory) / len(priceHistory),2)
 
     # Calculate the dates for different time periods
-    seven_days_ago = datetime.now().date() + timedelta(days=1)
-    fourteen_days_ago = datetime.now().date()
-    thirty_days_ago = datetime.now().date() - timedelta(days=1)
+    seven_days_ago = datetime.now().date() + timedelta(days=2)
+    fourteen_days_ago = datetime.now().date() + timedelta(days=1)
+    thirty_days_ago = datetime.now().date() + timedelta(days=0)
 
     current_price = None
     price_7_days_ago = None
@@ -124,7 +124,7 @@ def product_page(product_code):
     price_30_days_ago = None
 
     for row in priceHistory:
-        if row['date'] == datetime.now().date() + timedelta(days=2):
+        if row['date'] == datetime.now().date() + timedelta(days=3):
             current_price = row['price']
         if row['date'] == seven_days_ago:
             price_7_days_ago = row['price']

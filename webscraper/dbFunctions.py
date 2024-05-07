@@ -1,5 +1,5 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # Define Database File
 dbFile = '../src/site.db'
@@ -8,9 +8,6 @@ dbFile = '../src/site.db'
 def add_price_for_product(product_name, price, currency, date, unit, product_code):
     product_id = get_product_id(product_code)
     if product_id is not None:
-
-        if check_exists_for_current_date(product_id, date):
-
             # Connect to the database
             conn = sqlite3.connect(dbFile)
             cursor = conn.cursor()
@@ -20,8 +17,6 @@ def add_price_for_product(product_name, price, currency, date, unit, product_cod
 
             conn.commit()
             conn.close()
-        else:
-            print("Price has already been pushed today.")
     else:
         print(f"Product '{product_name}' not found.")
 
@@ -93,6 +88,32 @@ def check_exists_for_current_date(product_id, date):
         if len(rows)>0:
             return False
         return True
+
+def create_total_price():
+    # Create total price for all products
+    current_date = datetime.now().date() + timedelta(days=7)
+    conn = sqlite3.connect('../src/site.db')
+    cursor = conn.cursor()
+
+    item = cursor.execute('''SELECT * FROM total_price WHERE date = ?''', (current_date,)).fetchall()
+
+    if len(item) == 0:
+        prices = cursor.execute('''SELECT * FROM price_history WHERE date = ?''', (current_date,)).fetchall()
+
+        total_sum = 0
+        for price in prices:
+            total_sum += price[2]
+
+        cursor.execute('''INSERT INTO total_price (value, date) VALUES (?, ?)''', (total_sum, current_date,))
+
+        conn.commit()
+        conn.close()
+        print('Total price for:', current_date , "was" , total_sum , "kr")
+    else:
+        print("Total price already exists for this day.")
+        conn.close()
+
+import sqlite3
 
 
 #Import in other python file

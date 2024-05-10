@@ -22,4 +22,4 @@ with open(csv_file_path, mode='r', newline='') as file:
         product_code = row[1]
         scrape(product_code)
 
-create_total_price()
+create_total_price(datetime.now().date())

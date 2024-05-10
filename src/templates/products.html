@@ -6,6 +6,7 @@
 
 {% block main %}
 
+<img src="../static/willys.png" class="background-image" alt="">
 
 <h1>Show by category</h1>
 <form id="category-form" method="post">
@@ -40,25 +41,35 @@
 
 <u><h2>Total price of all products</h2></u>
 <div style="display: flex; width: 100%;">
-    <div style="flex: 1; width: 50%;">
-        <div id="plotly-graph1" style="height: fit-content; width: 50%;"></div>
-        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-        <script>
-            // Parse the Plotly JSON and display the graph
-            var graphJson = {{ graph_json|safe }};
-            Plotly.newPlot('plotly-graph1', graphJson.data, graphJson.layout);
-        </script>
+    <div id="graph1-container" style="flex: 1; width: 50%;">
+        <div id="plotly-graph1" style="height: fit-content; width: 100%;"></div>
     </div>
 
-    <div style="flex: 1; width: 50%;">
-        <div id="plotly-graph2" style="height: fit-content;"></div>
-        <script>
-            // Parse the Plotly JSON and display the graph
-            var graphJson2 = {{ graph2_json|safe }};
-            Plotly.newPlot('plotly-graph2', graphJson2.data, graphJson2.layout);
-        </script>
+    <div id="graph2-container" style="flex: 1; width: 50%;">
+        <div id="plotly-graph2" style="height: fit-content; width: 100%;"></div>
     </div>
 </div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    // Parse the Plotly JSON and display the graphs
+    var graphJson = {{ graph_json|safe }};
+    var graphJson2 = {{ graph2_json|safe }};
+
+    Plotly.newPlot('plotly-graph1', graphJson.data, graphJson.layout);
+    Plotly.newPlot('plotly-graph2', graphJson2.data, graphJson2.layout);
+
+    // Redraw graphs on window resize
+    window.addEventListener('resize', function() {
+        Plotly.Plots.resize('plotly-graph1');
+        Plotly.Plots.resize('plotly-graph2');
+    });
+</script>
+
+
+
+
+
 
 
 
@@ -105,6 +116,8 @@
                         <th>ID</th>
                         <th>Product Name</th>
                         <th>Weight</th>
+                        <th>Higest price</th>
+                        <th>Lowest price</th>
                         <th>Category</th>
                         <th>Product Code</th>
                     </tr>
@@ -115,6 +128,8 @@
                         <td>{{ product.id }}</td>
                         <td><a href="/products/{{ product.product_code }}">{{ product.product_name }}</a></td>
                         <td>{{ product.weight }}</td>
+                        <td>{{ product.max_price }}</td>
+                        <td>{{ product.min_price }}</td>
                         <td>{{ product.category }}</td>
                         <td>{{ product.product_code }}</td>
                     </tr>

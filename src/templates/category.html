@@ -57,6 +57,36 @@
 
 <hr>
 
+<u><h3>Statistics of category price / WORK IN PROGRESS</h3></u>
+<table style="height: 1%;">
+    <thead>
+        <tr>
+            <th>Price change last 7 Days (%)</th>
+            <th>Price change last 14 Days (%)</th>
+            <th>Price change last 30 Days (%)</th>
+            <!--
+            <th>Price change last 6 Months (kr)</th>
+            <th>Price change last 6 Months (%)</th>
+            <th>Price change last Year (kr)</th>
+            <th>Price change last Year (%)</th>
+            -->
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td style="color: {{ 'green' if category_metrics.price_percentage_7_days >= 0 else 'red' }}">{{category_metrics.price_percentage_7_days}}</td>
+            <td style="color: {{ 'green' if category_metrics.price_percentage_14_days >= 0 else 'red' }}">{{category_metrics.price_percentage_14_days}}</td>
+            <td style="color: {{ 'green' if category_metrics.price_percentage_30_days >= 0 else 'red' }}">{{category_metrics.price_percentage_30_days}}</td>
+            <!--
+            <td>Price change last 6 Months (%)</td>
+            <td>Price change last Year (%)</td>
+            -->
+        </tr>
+    </tbody>
+</table>
+
+<hr>
+
 <div style="overflow-x: auto; display: flex;">
     <div style="flex: 1;">
         <!-- Table 1: Products -->

@@ -367,3 +367,13 @@ table.no-text-color th {
 #transaction-table td:nth-child(7) {
     width: 10%; /* Adjust the width as needed */
 }
+
+.background-image {
+    position: fixed;
+    top: 5%;
+    left: 10%;
+    width: fit-content; /* Set width to cover the entire viewport */
+    height: fit-content; /* Set height to cover the entire viewport */
+    z-index: -1; /* Ensure the image stays behind everything */
+    pointer-events: none; /* Allows click events to pass through the image */
+}

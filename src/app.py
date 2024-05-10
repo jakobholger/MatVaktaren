@@ -106,18 +106,14 @@ def product_page(product_code):
     product = cursor.execute("SELECT * FROM products WHERE product_code = ?", (product_code,)).fetchone()
     priceHistory = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
 
-    # Find all-time high and all-time low prices maybe move as a column to database for each product
-    all_time_high = max(row['price'] for row in priceHistory)
-    all_time_low = min(row['price'] for row in priceHistory)
-
     # Calculate average price
     average_price = round(sum(row['price'] for row in priceHistory) / len(priceHistory),2)
 
     # Calculate the dates for different time periods
     current_date = datetime.now().date()
-    seven_days_ago = current_date + timedelta(days=2)
-    fourteen_days_ago = current_date + timedelta(days=1)
-    thirty_days_ago = current_date + timedelta(days=0)
+    seven_days_ago = current_date - timedelta(days=7)
+    fourteen_days_ago = current_date - timedelta(days=14)
+    thirty_days_ago = current_date - timedelta(days=30)
 
     current_price = None
     price_7_days_ago = None
@@ -125,51 +121,41 @@ def product_page(product_code):
     price_30_days_ago = None
 
     for row in priceHistory:
-        if row['date'] == datetime.now().date() + timedelta(days=3):
+        if row['date'] == current_date:
             current_price = row['price']
-        else:
-            print('No price for today.')
+
         if row['date'] == seven_days_ago:
             price_7_days_ago = row['price']
-        else:
-            print('No price 7 days ago.')
+
         if row['date'] == fourteen_days_ago:
             price_14_days_ago = row['price']
-        else:
-            print("No price 14 days ago.")
+
         if row['date'] == thirty_days_ago:
             price_30_days_ago = row['price']
-        else:
-            print("No price 30 days ago")
+
 
     # Calculate price changes for different time periods
     price_change_7_days = current_price - price_7_days_ago
-    price_percentage_7_days = round(float(((current_price-price_7_days_ago)/price_7_days_ago)),3)*100
+    price_percentage_7_days = round_float_to_one_decimals(((current_price-price_7_days_ago)/price_7_days_ago)*100)
     price_changes_14_days = current_price - price_14_days_ago
-    price_percentage_14_days = round(float(((current_price-price_14_days_ago)/price_14_days_ago)),3)*100
+    price_percentage_14_days = round_float_to_one_decimals(((current_price-price_14_days_ago)/price_14_days_ago)*100)
     price_changes_30_days = current_price - price_30_days_ago
-    price_percentage_30_days = round(float(((current_price-price_30_days_ago)/price_30_days_ago)),3)*100
+    price_percentage_30_days = round_float_to_one_decimals(((current_price-price_30_days_ago)/price_30_days_ago)*100)
 
     # Format the rounded values as floats of strings with two decimal places
-    price_change_7_days_str = float("{:.3f}".format(price_change_7_days))
-    price_change_14_days_str = float("{:.3f}".format(price_changes_14_days))
-    price_change_30_days_str = float("{:.3f}".format(price_changes_30_days))
-    price_percentage_7_days_str = float("{:.3f}".format(price_percentage_7_days))
-    price_percentage_14_days_str = float("{:.3f}".format(price_percentage_14_days))
-    price_percentage_30_days_str = float("{:.3f}".format(price_percentage_30_days))
 
     # Create a dictionary with all the values
     product_metrics = {
         "current_price": current_price,
-        "all_time_high": all_time_high,
-        "all_time_low": all_time_low,
+        "all_time_high": product['max_price'],
+        "all_time_low": product['min_price'],
         "average_price": average_price,
-        "price_change_7_days": price_change_7_days_str,
-        "price_percentage_7_days" : price_percentage_7_days_str,
-        "price_change_14_days": price_change_14_days_str,
-        "price_percentage_14_days" : price_percentage_14_days_str,
-        "price_change_30_days": price_change_30_days_str,
-        "price_percentage_30_days" : price_percentage_30_days_str
+        "price_change_7_days": price_change_7_days,
+        "price_percentage_7_days" : price_percentage_7_days,
+        "price_change_14_days": price_changes_14_days,
+        "price_percentage_14_days" : price_percentage_14_days,
+        "price_change_30_days": price_changes_30_days,
+        "price_percentage_30_days" : price_percentage_30_days
     }
 
     # Return dictionarie with data of price_history
@@ -217,15 +203,61 @@ def category(category):
     if not products:
         return apology("No products found in the specified category", 400)
 
+
+    current_date = datetime.now().date()
     # Fetch price history for each product
     price_history = []
     for product in products:
-        history = cursor.execute("SELECT * FROM price_history WHERE product_id = ? AND date = ?", (product['id'], datetime.now().date(),)).fetchall()
+        history = cursor.execute("SELECT * FROM price_history WHERE product_id = ? AND date = ?", (product['id'], current_date,)).fetchall()
         price_history.extend(history)
 
     # Ensure price history was found
     if not price_history:
         return apology("No price history found for the products in the specified category", 400)
+    
+    price_stats = []
+    for product in products:
+        item = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
+        price_stats.extend(item)
+
+    if not price_stats:
+        return apology("No price history found for the products in the specified category", 400)
+    
+    seven_days_ago = current_date - timedelta(days=7)
+    fourteen_days_ago = current_date - timedelta(days=14)
+    thirty_days_ago = current_date - timedelta(days=30)
+
+    current_price = None
+    price_7_days_ago = None
+    price_14_days_ago = None
+    price_30_days_ago = None
+
+    for row in price_stats:
+        if row['date'] == current_date:
+            current_price = row['price']
+        if row['date'] == seven_days_ago:
+            price_7_days_ago = row['price']
+        if row['date'] == fourteen_days_ago:
+            price_14_days_ago = row['price']
+        if row['date'] == thirty_days_ago:
+            price_30_days_ago = row['price']
+
+    # Calculate price changes for different time periods
+    price_percentage_7_days = round_float_to_one_decimals(((current_price - price_7_days_ago) / price_7_days_ago) * 100)
+    price_percentage_14_days = round_float_to_one_decimals(((current_price - price_14_days_ago) / price_14_days_ago) * 100)
+    price_percentage_30_days = round_float_to_one_decimals(((current_price - price_30_days_ago) / price_30_days_ago) * 100)
+
+    # Format the rounded values as strings with four decimal places
+    price_percentage_7_days_str = float(price_percentage_7_days)
+    price_percentage_14_days_str = float(price_percentage_14_days)
+    price_percentage_30_days_str = float(price_percentage_30_days)
+
+    # Create a dictionary with all the values
+    category_metrics = {
+        "price_percentage_7_days" : price_percentage_7_days_str,
+        "price_percentage_14_days" : price_percentage_14_days_str,
+        "price_percentage_30_days" : price_percentage_30_days_str
+    }
 
     # Convert fetched data into dictionaries
     data_products = [dict(product) for product in products]
@@ -260,7 +292,22 @@ def category(category):
     # Convert figure to JSON
     graph_json = fig.to_json()
 
-    return render_template('category.html', graph_json=graph_json, products=products, price_history=data_price_history)
+    return render_template('category.html', graph_json=graph_json, products=products, price_history=data_price_history, category_metrics=category_metrics)
+
+def round_float_to_one_decimals(num):
+    # Convert the float to a string
+    num_str = str(num)
+    # Find the index of the dot (".") character
+    dot_index = num_str.find(".")
+    if dot_index != -1:  # Check if dot exists in the string
+        # Slice the string up to two characters after the dot index
+        rounded_str = num_str[:dot_index + 2]
+        # Convert the rounded string back to float and return
+        return float(rounded_str)
+    else:
+        # If there's no dot, just return the original number
+        return num
+
 
 
 @app.route("/products", methods=['GET', 'POST'])
@@ -300,7 +347,6 @@ def product():
         product_id = d['product_id']
         product_name = product_id_to_name.get(product_id, 'Unknown Product')
         d['name'] = f"{product_name} (ID: {product_id})"  # Append product ID to the product name
-
 
 
     df = pd.DataFrame(dataPriceHistory)
@@ -343,9 +389,9 @@ def product():
     # Calculate the dates for different time periods
     current_date = datetime.now().date()
 
-    seven_days_ago = current_date + timedelta(days=2)
-    fourteen_days_ago = current_date + timedelta(days=1)
-    thirty_days_ago = current_date + timedelta(days=0)
+    seven_days_ago = current_date - timedelta(days=7)
+    fourteen_days_ago = current_date - timedelta(days=14)
+    thirty_days_ago = current_date - timedelta(days=30)
 
     current_price = None
     price_7_days_ago = None
@@ -353,7 +399,7 @@ def product():
     price_30_days_ago = None
 
     for row in total_prices:
-        if row['date'] == current_date + timedelta(days=3):
+        if row['date'] == current_date:
             current_price = row['value']
         if row['date'] == seven_days_ago:
             price_7_days_ago = row['value']
@@ -363,14 +409,14 @@ def product():
             price_30_days_ago = row['value']
 
     # Calculate price changes for different time periods
-    price_percentage_7_days = round(((current_price - price_7_days_ago) / price_7_days_ago) * 100, 3)
-    price_percentage_14_days = round(((current_price - price_14_days_ago) / price_14_days_ago) * 100, 3)
-    price_percentage_30_days = round(((current_price - price_30_days_ago) / price_30_days_ago) * 100, 3)
+    price_percentage_7_days = round_float_to_one_decimals(((current_price - price_7_days_ago) / price_7_days_ago) * 100)
+    price_percentage_14_days = round_float_to_one_decimals(((current_price - price_14_days_ago) / price_14_days_ago) * 100)
+    price_percentage_30_days = round_float_to_one_decimals(((current_price - price_30_days_ago) / price_30_days_ago) * 100)
 
     # Format the rounded values as strings with four decimal places
-    price_percentage_7_days_str = float("{:.3f}".format(price_percentage_7_days))
-    price_percentage_14_days_str = float("{:.3f}".format(price_percentage_14_days))
-    price_percentage_30_days_str = float("{:.3f}".format(price_percentage_30_days))
+    price_percentage_7_days_str = float(price_percentage_7_days)
+    price_percentage_14_days_str = float(price_percentage_14_days)
+    price_percentage_30_days_str = float(price_percentage_30_days)
 
 
     # Create a dictionary with all the values
@@ -385,7 +431,7 @@ def product():
 
     dataframe = pd.DataFrame(total_prices_dic)
 
-    fig2 = px.line(dataframe, x='date', y='value', labels={'price': 'price (kr)'}, title=f'{"Total"} Price Over Time')
+    fig2 = px.line(dataframe, x='date', y='value', labels={'price': 'price (kr)'}, title= 'Sum of all products prices that we track over time')
 
     fig2.update_layout(
     autosize=True,

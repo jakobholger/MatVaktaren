@@ -119,7 +119,7 @@ def login():
         session["user_id"] = rows[0]["id"]
         session['username'] = rows[0]["username"]
         # Redirect user to home page
-        return redirect("/products")
+        return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:

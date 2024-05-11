@@ -1,9 +1,4 @@
 venv
 src/__pycache__
 webscraper/__pycache__
-<<<<<<< HEAD
-final_project/flask_session
 src/flask_session
-=======
-src/flask_session
->>>>>>> main

@@ -12,6 +12,8 @@ def configure_database(dbFile):
             id INTEGER PRIMARY KEY,
             product_name TEXT,
             weight TEXT,
+            max_price NUMERIC,
+            min_price NUMERIC,
             category TEXT,
             product_code TEXT
         )''')

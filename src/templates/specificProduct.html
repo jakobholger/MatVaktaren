@@ -6,12 +6,12 @@
 
 {% block main %}
 
-<td><a href="/products"><h4>Go back</h4></a></td>
+<td><a href="/products"><h4>Gå tillbaka</h4></a></td>
 
 <u><h1>{{product.product_name}}</h1></u>
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<div id="plotly-graph"></div>
+<div id="plotly-graph" style="height: fit-content; width: 80%; margin: 0 auto;"></div>
 <script>
     // Parse the Plotly JSON and display the graph
     var graphJson = {{ graph_json|safe }};
@@ -20,24 +20,24 @@
 
 <hr>
 
-<u><h3>Current price: {{product_metrics.current_price}} kr</h3></u>
+<u><h3>Nuvarande pris: {{product_metrics.current_price}} kr</h3></u>
 
 
 <hr>
 
-<u><h3>Statistics of product / WORK IN PROGRESS</h3></u>
+<u><h3>Prisstatistik för produkten / WORK IN PROGRESS</h3></u>
 <table style="height: 1%;">
     <thead>
         <tr>
-            <th>All-time high (kr)</th>
-            <th>All-time low (kr)</th>
-            <th>Average price (kr)</th>
-            <th>Price change last 7 Days (kr)</th>
-            <th>Price change last 7 Days (%)</th>
-            <th>Price change last 14 Days (kr)</th>
-            <th>Price change last 14 Days (%)</th>
-            <th>Price change last 30 Days (kr)</th>
-            <th>Price change last 30 Days (%)</th>
+            <th>Högsta pris (kr)</th>
+            <th>Lägsta pris (kr)</th>
+            <th>Genomsnittligt pris (kr)</th>
+            <th>Prisförändring senaste 7 Dagarna (kr)</th>
+            <th>Prisförändring senaste 7 Dagarna (%)</th>
+            <th>Prisförändring senaste 14 Dagarna (kr)</th>
+            <th>Prisförändring senaste 14 Dagarna (%)</th>
+            <th>Prisförändring senaste 30 Dagarna (kr)</th>
+            <th>Prisförändring senaste 30 Dagarna (%)</th>
             <!--
             <th>Price change last 6 Months (kr)</th>
             <th>Price change last 6 Months (%)</th>
@@ -51,12 +51,12 @@
             <td>{{product_metrics.all_time_high}}</td>
             <td>{{product_metrics.all_time_low}}</td>
             <td>{{product_metrics.average_price}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_change_7_days >= 0 else 'red' }}">{{product_metrics.price_change_7_days}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_percentage_7_days >= 0 else 'red' }}">{{product_metrics.price_percentage_7_days}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_change_14_days >= 0 else 'red' }}">{{product_metrics.price_change_14_days}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_percentage_14_days >= 0 else 'red' }}">{{product_metrics.price_percentage_14_days}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_change_30_days >= 0 else 'red' }}">{{product_metrics.price_change_30_days}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_percentage_30_days >= 0 else 'red' }}">{{product_metrics.price_percentage_30_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_change_7_days != 'N/A' and product_metrics.price_change_7_days >= 0 else 'red' }}">{{product_metrics.price_change_7_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_percentage_7_days != 'N/A' and product_metrics.price_percentage_7_days >= 0 else 'red' }}">{{product_metrics.price_percentage_7_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_change_14_days != 'N/A' and product_metrics.price_change_14_days >= 0 else 'red' }}">{{product_metrics.price_change_14_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_percentage_14_days != 'N/A' and product_metrics.price_percentage_14_days >= 0 else 'red' }}">{{product_metrics.price_percentage_14_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_change_30_days != 'N/A' and product_metrics.price_change_30_days >= 0 else 'red' }}">{{product_metrics.price_change_30_days}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_percentage_30_days != 'N/A' and product_metrics.price_percentage_30_days >= 0 else 'red' }}">{{product_metrics.price_percentage_30_days}}</td>
             <!--
             <td>Price change last 6 Months (kr)</td>
             <td>Price change last 6 Months (%)</td>
@@ -72,9 +72,9 @@
 <table>
     <thead>
         <tr>
-            <th>Pushed Date</th>
-            <th>Price (kr)</th>
-            <th>Unit</th>
+            <th>Datumn</th>
+            <th>Pris (kr)</th>
+            <th>Jmf-pris</th>
         </tr>
     </thead>
     <tbody>

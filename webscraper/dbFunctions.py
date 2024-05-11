@@ -7,28 +7,42 @@ dbFile = '../src/site.db'
 # Function to add a new price for an existing product
 def add_price_for_product(product_name, price, currency, date, unit, product_code):
     product_id = get_product_id(product_code)
+    
     if product_id is not None:
-            # Connect to the database
-            conn = sqlite3.connect(dbFile)
-            cursor = conn.cursor()
+        # Connect to the database
+        conn = sqlite3.connect(dbFile)
+        cursor = conn.cursor()
 
-            cursor.execute('''INSERT INTO price_history (product_id, price, currency, date, unit)
-                      VALUES (?, ?, ?, ?, ?)''', (product_id, price, currency, date, unit))
+        cursor.execute('''SELECT max_price, min_price FROM products WHERE id = ?''', (product_id,))
+        row = cursor.fetchone()
 
-            conn.commit()
-            conn.close()
+        max_price = float(row[0])
+        min_price = float(row[1])
+
+        if float(price) > max_price:
+            # Update max price
+            cursor.execute('''UPDATE products SET max_price = ? WHERE id = ?''', (price, product_id))
+        if float(price) < min_price:
+            # Update min price
+            cursor.execute('''UPDATE products SET min_price = ? WHERE id = ?''', (price, product_id))
+
+        cursor.execute('''INSERT INTO price_history (product_id, price, currency, date, unit)
+                  VALUES (?, ?, ?, ?, ?)''', (product_id, price, currency, date, unit))
+
+        conn.commit()
+        conn.close()
     else:
         print(f"Product '{product_name}' not found.")
 
 # Function to create a new product in the products table
-def create_product(product_name, weight, product_code, category):
+def create_product(product_name, weight, max_price, min_price, product_code, category):
     conn = sqlite3.connect(dbFile)
     cursor = conn.cursor()
 
     product_id = get_product_id(product_code)
     if product_id is None:
         # Insert the new product into the products table
-        cursor.execute('''INSERT INTO products (product_name, weight, category, product_code) VALUES (?, ?, ?, ?)''', (product_name, weight, category, product_code,))
+        cursor.execute('''INSERT INTO products (product_name, weight, max_price, min_price, category, product_code) VALUES (?, ?, ?, ?, ?, ?)''', (product_name, weight, max_price, min_price, category, product_code,))
         conn.commit()
         conn.close()
         print("Product created successfully.")
@@ -89,9 +103,8 @@ def check_exists_for_current_date(product_id, date):
             return False
         return True
 
-def create_total_price():
+def create_total_price(current_date):
     # Create total price for all products
-    current_date = datetime.now().date() + timedelta(days=7)
     conn = sqlite3.connect('../src/site.db')
     cursor = conn.cursor()
 
@@ -108,12 +121,10 @@ def create_total_price():
 
         conn.commit()
         conn.close()
-        print('Total price for:', current_date , "was" , total_sum , "kr")
+        print('Total price for:', current_date , "was" , round(total_sum, 2) , "kr")
     else:
         print("Total price already exists for this day.")
         conn.close()
-
-import sqlite3
 
 
 #Import in other python file

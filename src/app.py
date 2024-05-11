@@ -51,9 +51,38 @@ def after_request(response):
 
 
 @app.route("/")
-@login_required
+#@login_required
 def index():
-    return render_template("index.html")
+    # Connect to DB
+    cursor = get_db().cursor()
+    cursor.execute("""
+    SELECT category, COUNT(*) AS count
+    FROM products
+    GROUP BY category
+    """)
+
+    results = cursor.fetchall()
+
+    df = pd.DataFrame(results, columns=['category', 'count'])
+
+    fig = px.pie(df, values='count', names='category', labels={'category': 'Kategori', 'count': 'Antal produkter'}, title='Produkt Kategori Distribution')
+
+    fig.update_layout(
+        autosize=True,
+        margin=dict(l=10, r=10, t=70, b=10),
+        paper_bgcolor="#293251",
+        plot_bgcolor="#37414e",
+        font=dict(color='white', size = 9),  # Set the color of all text to white
+        title=dict(font=dict(color='white')),  # Set the color of the title text to white
+        xaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the x-axis title text to white
+        yaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the y-axis title text to white
+        legend=dict(title=dict(font=dict(color='white')), font=dict(color='white')),  # Set the color of legend text to white
+    )
+
+    graph_json = fig.to_json()
+
+
+    return render_template("index.html", graph_json=graph_json)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -90,7 +119,7 @@ def login():
         session["user_id"] = rows[0]["id"]
         session['username'] = rows[0]["username"]
         # Redirect user to home page
-        return redirect("/products")
+        return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
     else:
@@ -106,46 +135,57 @@ def product_page(product_code):
     product = cursor.execute("SELECT * FROM products WHERE product_code = ?", (product_code,)).fetchone()
     priceHistory = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
 
-    # Find all-time high and all-time low prices
-    all_time_high = max(row['price'] for row in priceHistory)
-    all_time_low = min(row['price'] for row in priceHistory)
-
     # Calculate average price
     average_price = round(sum(row['price'] for row in priceHistory) / len(priceHistory),2)
 
     # Calculate the dates for different time periods
-    seven_days_ago = datetime.now().date() + timedelta(days=2)
-    fourteen_days_ago = datetime.now().date() + timedelta(days=1)
-    thirty_days_ago = datetime.now().date() + timedelta(days=0)
+    current_date = datetime.now().date()
+    seven_days_ago = current_date - timedelta(days=7)
+    fourteen_days_ago = current_date - timedelta(days=14)
+    thirty_days_ago = current_date - timedelta(days=30)
 
-    current_price = None
-    price_7_days_ago = None
-    price_14_days_ago = None
-    price_30_days_ago = None
+    current_price = "N/A"
+    price_7_days_ago = "N/A"
+    price_14_days_ago = "N/A"
+    price_30_days_ago = "N/A"
+    price_percentage_7_days = "N/A"
+    price_percentage_14_days = "N/A"
+    price_percentage_30_days = "N/A"
+    price_change_7_days = "N/A"
+    price_changes_14_days = "N/A"
+    price_changes_30_days = "N/A"
 
     for row in priceHistory:
-        if row['date'] == datetime.now().date() + timedelta(days=3):
+        if row['date'] == current_date:
             current_price = row['price']
+
         if row['date'] == seven_days_ago:
             price_7_days_ago = row['price']
+
         if row['date'] == fourteen_days_ago:
             price_14_days_ago = row['price']
+
         if row['date'] == thirty_days_ago:
             price_30_days_ago = row['price']
 
+
     # Calculate price changes for different time periods
-    price_change_7_days = current_price - price_7_days_ago
-    price_percentage_7_days = round(float(((current_price-price_7_days_ago)/price_7_days_ago)),4)*100
-    price_changes_14_days = current_price - price_14_days_ago
-    price_percentage_14_days = round(float(((current_price-price_14_days_ago)/price_14_days_ago)),4)*100
-    price_changes_30_days = current_price - price_30_days_ago
-    price_percentage_30_days = round(float(((current_price-price_30_days_ago)/price_30_days_ago)),4)*100
+    if current_price != "N/A":
+        if price_7_days_ago != "N/A":
+            price_change_7_days = current_price - price_7_days_ago
+            price_percentage_7_days = round_float_to_one_decimals(((current_price-price_7_days_ago)/price_7_days_ago)*100)
+        if price_14_days_ago != "N/A":
+            price_changes_14_days = current_price - price_14_days_ago
+            price_percentage_14_days = round_float_to_one_decimals(((current_price-price_14_days_ago)/price_14_days_ago)*100)
+        if price_30_days_ago != "N/A":
+            price_changes_30_days = current_price - price_30_days_ago
+            price_percentage_30_days = round_float_to_one_decimals(((current_price-price_30_days_ago)/price_30_days_ago)*100)
 
     # Create a dictionary with all the values
     product_metrics = {
         "current_price": current_price,
-        "all_time_high": all_time_high,
-        "all_time_low": all_time_low,
+        "all_time_high": product['max_price'],
+        "all_time_low": product['min_price'],
         "average_price": average_price,
         "price_change_7_days": price_change_7_days,
         "price_percentage_7_days" : price_percentage_7_days,
@@ -162,7 +202,7 @@ def product_page(product_code):
 
     df = pd.DataFrame(dataPriceHistory)
 
-    fig = px.line(df, x='date', y='price', labels={'price': 'price'}, title=f'{dict(product)['product_name']} Price Over Time')
+    fig = px.line(df, x='date', y='price', labels={'price': 'price'}, title=f'{dict(product)['product_name']} Pris över tid')
 
     fig.update_layout(
         autosize=True,
@@ -200,32 +240,94 @@ def category(category):
     if not products:
         return apology("No products found in the specified category", 400)
 
+
+    current_date = datetime.now().date()
     # Fetch price history for each product
     price_history = []
     for product in products:
-        history = cursor.execute("SELECT * FROM price_history WHERE product_id = ? AND date = ?", (product['id'], datetime.now().date(),)).fetchall()
+        history = cursor.execute("SELECT * FROM price_history WHERE product_id = ? AND date = ?", (product['id'], current_date,)).fetchall()
         price_history.extend(history)
 
     # Ensure price history was found
     if not price_history:
         return apology("No price history found for the products in the specified category", 400)
+    
+    price_stats = []
+    for product in products:
+        item = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
+        price_stats.extend(item)
+
+    if not price_stats:
+        return apology("No price history found for the products in the specified category", 400)
+    
+    seven_days_ago = current_date - timedelta(days=7)
+    fourteen_days_ago = current_date - timedelta(days=14)
+    thirty_days_ago = current_date - timedelta(days=30)
+
+    current_price = "N/A"
+    price_7_days_ago = "N/A"
+    price_14_days_ago = "N/A"
+    price_30_days_ago = "N/A"
+    price_percentage_7_days = "N/A"
+    price_percentage_14_days = "N/A"
+    price_percentage_30_days = "N/A"
+
+    for row in price_stats:
+        if row['date'] == current_date:
+            current_price = row['price']
+        if row['date'] == seven_days_ago:
+            price_7_days_ago = row['price']
+        if row['date'] == fourteen_days_ago:
+            price_14_days_ago = row['price']
+        if row['date'] == thirty_days_ago:
+            price_30_days_ago = row['price']
+
+    # Calculate price changes for different time periods
+    if current_price != "N/A":
+        if price_7_days_ago != "N/A":
+            price_percentage_7_days = round_float_to_one_decimals(((current_price-price_7_days_ago)/price_7_days_ago)*100)
+        if price_14_days_ago != "N/A":
+            price_percentage_14_days = round_float_to_one_decimals(((current_price-price_14_days_ago)/price_14_days_ago)*100)
+        if price_30_days_ago != "N/A":
+            price_percentage_30_days = round_float_to_one_decimals(((current_price-price_30_days_ago)/price_30_days_ago)*100)
+
+
+    # Create a dictionary with all the values
+    category_metrics = {
+        "price_percentage_7_days" : price_percentage_7_days,
+        "price_percentage_14_days" : price_percentage_14_days,
+        "price_percentage_30_days" : price_percentage_30_days
+    }
+
+    product_info_data  = cursor.execute("""
+    SELECT id, product_name
+    FROM products
+    WHERE category LIKE ?
+    """, ('%' + category + '%',)).fetchall()
+
+    product_info_dicts = [dict(row) for row in product_info_data]
+
+    price_history_data = []
+    for product in product_info_dicts:
+        history = cursor.execute("SELECT product_id, price, date FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
+        price_history_data.extend(history)
+        product['product_name'] = f"{product['product_name']} (ID: {product['id']})"
+
+
+    # Convert fetched data to DataFrames
+    product_info_df = pd.DataFrame(product_info_dicts, columns=['id', 'product_name'])
+    price_history_df = pd.DataFrame(price_history_data, columns=['product_id', 'date', 'price'])
+
+    # Merge product information with price history
+    merged_df = pd.merge(price_history_df, product_info_df, left_on='product_id', right_on='id')
+
+    # Plot prices over time using Plotly Express
+    fig = px.line(merged_df, x='price', y='date', color='product_name',
+              labels={'date': 'Pris (kr)', 'price': 'Datumn', 'product_name': 'Produkt'}, title='Prisutveckling av kategorins produkter över tid')
+
 
     # Convert fetched data into dictionaries
-    data_products = [dict(product) for product in products]
     data_price_history = [dict(row) for row in price_history]
-
-    # Assign product names to price history data
-    for d in data_price_history:
-        product_id = d['product_id']
-        for item in data_products:
-            if item['id'] == product_id:
-                d['name'] = item['product_name']
-
-    # Create DataFrame from price history data
-    df = pd.DataFrame(data_price_history)
-
-    # Plot graph using Plotly Express
-    fig = px.bar(df, x='name', y='price', labels={'price': 'price (kr)'}, title=f'Products Price Over Time')
 
     # Update layout
     fig.update_layout(
@@ -243,7 +345,22 @@ def category(category):
     # Convert figure to JSON
     graph_json = fig.to_json()
 
-    return render_template('category.html', graph_json=graph_json, products=products, price_history=data_price_history)
+    return render_template('category.html', graph_json=graph_json, products=products, price_history=data_price_history, category_metrics=category_metrics)
+
+def round_float_to_one_decimals(num):
+    # Convert the float to a string
+    num_str = str(num)
+    # Find the index of the dot (".") character
+    dot_index = num_str.find(".")
+    if dot_index != -1:  # Check if dot exists in the string
+        # Slice the string up to two characters after the dot index
+        rounded_str = num_str[:dot_index + 2]
+        # Convert the rounded string back to float and return
+        return float(rounded_str)
+    else:
+        # If there's no dot, just return the original number
+        return float(num)
+
 
 
 @app.route("/products", methods=['GET', 'POST'])
@@ -275,17 +392,19 @@ def product():
     for row in priceHistory:
         dataPriceHistory.append(dict(row))
 
-    # Names for the graphs
+    # Create a dictionary to map product IDs to product names
+    product_id_to_name = {item['id']: item['product_name'] for item in dataProducts}
+
+    # Assign product names to dataPriceHistory items based on their product IDs
     for d in dataPriceHistory:
         product_id = d['product_id']
-        for item in dataProducts:
-            if item['id'] == product_id:
-                d['name'] = item['product_name']
+        product_name = product_id_to_name.get(product_id, 'Unknown Product')
+        d['name'] = f"{product_name} (ID: {product_id})"  # Append product ID to the product name
 
 
     df = pd.DataFrame(dataPriceHistory)
 
-    fig = px.bar(df, x='name', y='price', labels={'price': 'price (kr)'}, title='Current price for products')
+    fig = px.bar(df, x='name', y='price', labels={'price': 'Pris (kr)', 'name' : 'Namn'}, title='Nuvarande pris för samtliga produkter')
 
     fig.update_layout(
         autosize=True,
@@ -321,17 +440,22 @@ def product():
     average_price = round(sum(row['value'] for row in total_prices) / len(total_prices),2)
 
     # Calculate the dates for different time periods
-    seven_days_ago = datetime.now().date() + timedelta(days=2)
-    fourteen_days_ago = datetime.now().date() + timedelta(days=1)
-    thirty_days_ago = datetime.now().date() + timedelta(days=0)
+    current_date = datetime.now().date()
 
-    current_price = None
-    price_7_days_ago = None
-    price_14_days_ago = None
-    price_30_days_ago = None
+    seven_days_ago = current_date - timedelta(days=7)
+    fourteen_days_ago = current_date - timedelta(days=14)
+    thirty_days_ago = current_date - timedelta(days=30)
+
+    current_price = "N/A"
+    price_7_days_ago = "N/A"
+    price_14_days_ago = "N/A"
+    price_30_days_ago = "N/A"
+    price_percentage_7_days = "N/A"
+    price_percentage_14_days = "N/A"
+    price_percentage_30_days = "N/A"
 
     for row in total_prices:
-        if row['date'] == datetime.now().date() + timedelta(days=3):
+        if row['date'] == current_date:
             current_price = row['value']
         if row['date'] == seven_days_ago:
             price_7_days_ago = row['value']
@@ -341,29 +465,28 @@ def product():
             price_30_days_ago = row['value']
 
     # Calculate price changes for different time periods
-    price_change_7_days = current_price - price_7_days_ago
-    price_percentage_7_days = round(float(((current_price-price_7_days_ago)/price_7_days_ago)),4)*100
-    price_changes_14_days = current_price - price_14_days_ago
-    price_percentage_14_days = round(float(((current_price-price_14_days_ago)/price_14_days_ago)),4)*100
-    price_changes_30_days = current_price - price_30_days_ago
-    price_percentage_30_days = round(float(((current_price-price_30_days_ago)/price_30_days_ago)),4)*100
+    if current_price != "N/A":
+        if price_7_days_ago != "N/A":
+            price_percentage_7_days = round_float_to_one_decimals(((current_price-price_7_days_ago)/price_7_days_ago)*100)
+        if price_14_days_ago != "N/A":
+            price_percentage_14_days = round_float_to_one_decimals(((current_price-price_14_days_ago)/price_14_days_ago)*100)
+        if price_30_days_ago != "N/A":
+            price_percentage_30_days = round_float_to_one_decimals(((current_price-price_30_days_ago)/price_30_days_ago)*100)
+
 
     # Create a dictionary with all the values
     total_metrics = {
         "all_time_high": all_time_high,
         "all_time_low": all_time_low,
         "average_price": average_price,
-        "price_change_7_days": price_change_7_days,
         "price_percentage_7_days" : price_percentage_7_days,
-        "price_change_14_days": price_changes_14_days,
         "price_percentage_14_days" : price_percentage_14_days,
-        "price_change_30_days": price_changes_30_days,
         "price_percentage_30_days" : price_percentage_30_days
     }
 
     dataframe = pd.DataFrame(total_prices_dic)
 
-    fig2 = px.line(dataframe, x='date', y='value', labels={'price': 'price (kr)'}, title=f'{"Total"} Price Over Time')
+    fig2 = px.line(dataframe, x='date', y='value', labels={'price': 'Pris (kr)', 'value' : 'Värde', 'date' : 'Datumn'}, title= 'Total summa av samtliga produktpriser som spåras över tid')
 
     fig2.update_layout(
     autosize=True,

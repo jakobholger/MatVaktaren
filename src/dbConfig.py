@@ -15,7 +15,7 @@ def configure_database(dbFile):
             max_price NUMERIC,
             min_price NUMERIC,
             category TEXT,
-            product_code TEXT,
+            product_code TEXT
         )''')
         db.execute('''CREATE TABLE price_history (
             id INTEGER PRIMARY KEY,

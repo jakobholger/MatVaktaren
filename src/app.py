@@ -51,7 +51,7 @@ def after_request(response):
 
 
 @app.route("/")
-@login_required
+#@login_required
 def index():
     # Connect to DB
     cursor = get_db().cursor()
@@ -65,14 +65,14 @@ def index():
 
     df = pd.DataFrame(results, columns=['category', 'count'])
 
-    fig = px.pie(df, values='count', names='category', title='Product Categories Distribution')
+    fig = px.pie(df, values='count', names='category', labels={'category': 'Kategori', 'count': 'Antal produkter'}, title='Produkt Kategori Distribution')
 
     fig.update_layout(
         autosize=True,
         margin=dict(l=10, r=10, t=70, b=10),
-        paper_bgcolor="#212529",
+        paper_bgcolor="#293251",
         plot_bgcolor="#37414e",
-        font=dict(color='white'),  # Set the color of all text to white
+        font=dict(color='white', size = 9),  # Set the color of all text to white
         title=dict(font=dict(color='white')),  # Set the color of the title text to white
         xaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the x-axis title text to white
         yaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the y-axis title text to white
@@ -144,10 +144,16 @@ def product_page(product_code):
     fourteen_days_ago = current_date - timedelta(days=14)
     thirty_days_ago = current_date - timedelta(days=30)
 
-    current_price = None
-    price_7_days_ago = None
-    price_14_days_ago = None
-    price_30_days_ago = None
+    current_price = "N/A"
+    price_7_days_ago = "N/A"
+    price_14_days_ago = "N/A"
+    price_30_days_ago = "N/A"
+    price_percentage_7_days = "N/A"
+    price_percentage_14_days = "N/A"
+    price_percentage_30_days = "N/A"
+    price_change_7_days = "N/A"
+    price_changes_14_days = "N/A"
+    price_changes_30_days = "N/A"
 
     for row in priceHistory:
         if row['date'] == current_date:
@@ -164,14 +170,16 @@ def product_page(product_code):
 
 
     # Calculate price changes for different time periods
-    price_change_7_days = current_price - price_7_days_ago
-    price_percentage_7_days = round_float_to_one_decimals(((current_price-price_7_days_ago)/price_7_days_ago)*100)
-    price_changes_14_days = current_price - price_14_days_ago
-    price_percentage_14_days = round_float_to_one_decimals(((current_price-price_14_days_ago)/price_14_days_ago)*100)
-    price_changes_30_days = current_price - price_30_days_ago
-    price_percentage_30_days = round_float_to_one_decimals(((current_price-price_30_days_ago)/price_30_days_ago)*100)
-
-    # Format the rounded values as floats of strings with two decimal places
+    if current_price != "N/A":
+        if price_7_days_ago != "N/A":
+            price_change_7_days = current_price - price_7_days_ago
+            price_percentage_7_days = round_float_to_one_decimals(((current_price-price_7_days_ago)/price_7_days_ago)*100)
+        if price_14_days_ago != "N/A":
+            price_changes_14_days = current_price - price_14_days_ago
+            price_percentage_14_days = round_float_to_one_decimals(((current_price-price_14_days_ago)/price_14_days_ago)*100)
+        if price_30_days_ago != "N/A":
+            price_changes_30_days = current_price - price_30_days_ago
+            price_percentage_30_days = round_float_to_one_decimals(((current_price-price_30_days_ago)/price_30_days_ago)*100)
 
     # Create a dictionary with all the values
     product_metrics = {
@@ -194,7 +202,7 @@ def product_page(product_code):
 
     df = pd.DataFrame(dataPriceHistory)
 
-    fig = px.line(df, x='date', y='price', labels={'price': 'price'}, title=f'{dict(product)['product_name']} Price Over Time')
+    fig = px.line(df, x='date', y='price', labels={'price': 'price'}, title=f'{dict(product)['product_name']} Pris över tid')
 
     fig.update_layout(
         autosize=True,
@@ -256,10 +264,13 @@ def category(category):
     fourteen_days_ago = current_date - timedelta(days=14)
     thirty_days_ago = current_date - timedelta(days=30)
 
-    current_price = None
-    price_7_days_ago = None
-    price_14_days_ago = None
-    price_30_days_ago = None
+    current_price = "N/A"
+    price_7_days_ago = "N/A"
+    price_14_days_ago = "N/A"
+    price_30_days_ago = "N/A"
+    price_percentage_7_days = "N/A"
+    price_percentage_14_days = "N/A"
+    price_percentage_30_days = "N/A"
 
     for row in price_stats:
         if row['date'] == current_date:
@@ -272,20 +283,20 @@ def category(category):
             price_30_days_ago = row['price']
 
     # Calculate price changes for different time periods
-    price_percentage_7_days = round_float_to_one_decimals(((current_price - price_7_days_ago) / price_7_days_ago) * 100)
-    price_percentage_14_days = round_float_to_one_decimals(((current_price - price_14_days_ago) / price_14_days_ago) * 100)
-    price_percentage_30_days = round_float_to_one_decimals(((current_price - price_30_days_ago) / price_30_days_ago) * 100)
+    if current_price != "N/A":
+        if price_7_days_ago != "N/A":
+            price_percentage_7_days = round_float_to_one_decimals(((current_price-price_7_days_ago)/price_7_days_ago)*100)
+        if price_14_days_ago != "N/A":
+            price_percentage_14_days = round_float_to_one_decimals(((current_price-price_14_days_ago)/price_14_days_ago)*100)
+        if price_30_days_ago != "N/A":
+            price_percentage_30_days = round_float_to_one_decimals(((current_price-price_30_days_ago)/price_30_days_ago)*100)
 
-    # Format the rounded values as strings with four decimal places
-    price_percentage_7_days_str = float(price_percentage_7_days)
-    price_percentage_14_days_str = float(price_percentage_14_days)
-    price_percentage_30_days_str = float(price_percentage_30_days)
 
     # Create a dictionary with all the values
     category_metrics = {
-        "price_percentage_7_days" : price_percentage_7_days_str,
-        "price_percentage_14_days" : price_percentage_14_days_str,
-        "price_percentage_30_days" : price_percentage_30_days_str
+        "price_percentage_7_days" : price_percentage_7_days,
+        "price_percentage_14_days" : price_percentage_14_days,
+        "price_percentage_30_days" : price_percentage_30_days
     }
 
     product_info_data  = cursor.execute("""
@@ -312,7 +323,7 @@ def category(category):
 
     # Plot prices over time using Plotly Express
     fig = px.line(merged_df, x='price', y='date', color='product_name',
-              labels={'date': 'Price', 'price': 'Date', 'product_name': 'Product'})
+              labels={'date': 'Pris (kr)', 'price': 'Datumn', 'product_name': 'Produkt'}, title='Prisutveckling av kategorins produkter över tid')
 
 
     # Convert fetched data into dictionaries
@@ -348,7 +359,7 @@ def round_float_to_one_decimals(num):
         return float(rounded_str)
     else:
         # If there's no dot, just return the original number
-        return num
+        return float(num)
 
 
 
@@ -393,7 +404,7 @@ def product():
 
     df = pd.DataFrame(dataPriceHistory)
 
-    fig = px.bar(df, x='name', y='price', labels={'price': 'price (kr)'}, title='Current price for products')
+    fig = px.bar(df, x='name', y='price', labels={'price': 'Pris (kr)', 'name' : 'Namn'}, title='Nuvarande pris för samtliga produkter')
 
     fig.update_layout(
         autosize=True,
@@ -435,10 +446,13 @@ def product():
     fourteen_days_ago = current_date - timedelta(days=14)
     thirty_days_ago = current_date - timedelta(days=30)
 
-    current_price = None
-    price_7_days_ago = None
-    price_14_days_ago = None
-    price_30_days_ago = None
+    current_price = "N/A"
+    price_7_days_ago = "N/A"
+    price_14_days_ago = "N/A"
+    price_30_days_ago = "N/A"
+    price_percentage_7_days = "N/A"
+    price_percentage_14_days = "N/A"
+    price_percentage_30_days = "N/A"
 
     for row in total_prices:
         if row['date'] == current_date:
@@ -451,14 +465,13 @@ def product():
             price_30_days_ago = row['value']
 
     # Calculate price changes for different time periods
-    price_percentage_7_days = round_float_to_one_decimals(((current_price - price_7_days_ago) / price_7_days_ago) * 100)
-    price_percentage_14_days = round_float_to_one_decimals(((current_price - price_14_days_ago) / price_14_days_ago) * 100)
-    price_percentage_30_days = round_float_to_one_decimals(((current_price - price_30_days_ago) / price_30_days_ago) * 100)
-
-    # Format the rounded values as strings with four decimal places
-    price_percentage_7_days_str = float(price_percentage_7_days)
-    price_percentage_14_days_str = float(price_percentage_14_days)
-    price_percentage_30_days_str = float(price_percentage_30_days)
+    if current_price != "N/A":
+        if price_7_days_ago != "N/A":
+            price_percentage_7_days = round_float_to_one_decimals(((current_price-price_7_days_ago)/price_7_days_ago)*100)
+        if price_14_days_ago != "N/A":
+            price_percentage_14_days = round_float_to_one_decimals(((current_price-price_14_days_ago)/price_14_days_ago)*100)
+        if price_30_days_ago != "N/A":
+            price_percentage_30_days = round_float_to_one_decimals(((current_price-price_30_days_ago)/price_30_days_ago)*100)
 
 
     # Create a dictionary with all the values
@@ -466,14 +479,14 @@ def product():
         "all_time_high": all_time_high,
         "all_time_low": all_time_low,
         "average_price": average_price,
-        "price_percentage_7_days" : price_percentage_7_days_str,
-        "price_percentage_14_days" : price_percentage_14_days_str,
-        "price_percentage_30_days" : price_percentage_30_days_str
+        "price_percentage_7_days" : price_percentage_7_days,
+        "price_percentage_14_days" : price_percentage_14_days,
+        "price_percentage_30_days" : price_percentage_30_days
     }
 
     dataframe = pd.DataFrame(total_prices_dic)
 
-    fig2 = px.line(dataframe, x='date', y='value', labels={'price': 'price (kr)'}, title= 'Sum of all products prices that we track over time')
+    fig2 = px.line(dataframe, x='date', y='value', labels={'price': 'Pris (kr)', 'value' : 'Värde', 'date' : 'Datumn'}, title= 'Total summa av samtliga produktpriser som spåras över tid')
 
     fig2.update_layout(
     autosize=True,

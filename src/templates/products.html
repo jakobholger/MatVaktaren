@@ -1,14 +1,14 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Product List
+    Produkt Lista
 {% endblock %}
 
 {% block main %}
 
-<h1>Show by category</h1>
+<h1>Visa efter kategori</h1>
 <form id="category-form" method="post">
-    <label for="category-select">Select a category:</label>
+    <label for="category-select">Välj en kategory:</label>
     <select id="category-select" name="category">
         <option value="skafferi">Skafferi</option>
         <option value="mejeri-ost-och-agg">Mejeri ost och ägg</option>
@@ -37,7 +37,7 @@
 
 <hr>
 
-<u><h2>Total price of all products</h2></u>
+<u><h2>Totalt pris av alla produkter</h2></u>
 <div style="display: flex; width: 100%;">
     <div id="graph1-container" style="flex: 1; width: 50%;">
         <div id="plotly-graph1" style="height: fit-content; width: 100%;"></div>
@@ -74,13 +74,13 @@
 
 <hr>
 
-<u><h3>Statistics of total price / WORK IN PROGRESS</h3></u>
+<u><h3>Statistik av totalt pris / WORK IN PROGRESS</h3></u>
 <table style="height: 1%;">
     <thead>
         <tr>
-            <th>Price change last 7 Days (%)</th>
-            <th>Price change last 14 Days (%)</th>
-            <th>Price change last 30 Days (%)</th>
+            <th>Pris förändring senaste 7 Dagarna (%)</th>
+            <th>Pris förändring senaste 14 Dagarna (%)</th>
+            <th>Pris förändring senaste 30 Dagarna (%)</th>
             <!--
             <th>Price change last 6 Months (kr)</th>
             <th>Price change last 6 Months (%)</th>
@@ -91,9 +91,10 @@
     </thead>
     <tbody>
         <tr>
-            <td style="color: {{ 'green' if total_metrics.price_percentage_7_days >= 0 else 'red' }}">{{total_metrics.price_percentage_7_days}}</td>
-            <td style="color: {{ 'green' if total_metrics.price_percentage_14_days >= 0 else 'red' }}">{{total_metrics.price_percentage_14_days}}</td>
-            <td style="color: {{ 'green' if total_metrics.price_percentage_30_days >= 0 else 'red' }}">{{total_metrics.price_percentage_30_days}}</td>
+            <td style="color: {{ 'green' if total_metrics.price_percentage_7_days != 'N/A' and total_metrics.price_percentage_7_days >= 0 else 'red' }}">{{ total_metrics.price_percentage_7_days}}</td>
+            <td style="color: {{ 'green' if total_metrics.price_percentage_14_days != 'N/A' and total_metrics.price_percentage_14_days >= 0 else 'red' }}">{{ total_metrics.price_percentage_14_days }}</td>
+            <td style="color: {{ 'green' if total_metrics.price_percentage_30_days != 'N/A' and total_metrics.price_percentage_30_days >= 0 else 'red' }}">{{ total_metrics.price_percentage_30_days }}</td>
+            
             <!--
             <td>Price change last 6 Months (%)</td>
             <td>Price change last Year (%)</td>
@@ -112,12 +113,12 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Product Name</th>
-                        <th>Weight</th>
-                        <th>Higest price</th>
-                        <th>Lowest price</th>
-                        <th>Category</th>
-                        <th>Product Code</th>
+                        <th>Produkt Namn</th>
+                        <th>Vikt</th>
+                        <th>Högsta pris</th>
+                        <th>Lägsta pris</th>
+                        <th>Kategori</th>
+                        <th>Produkt Kod</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -144,10 +145,10 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Product ID</th>
-                        <th>Price</th>
-                        <th>Unit</th>
-                        <th>Pushed Date</th>
+                        <th>Produkt ID</th>
+                        <th>Pris</th>
+                        <th>Jmf-pris</th>
+                        <th>Datumn</th>
                     </tr>
                 </thead>
                 <tbody>

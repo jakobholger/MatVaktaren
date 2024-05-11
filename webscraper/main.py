@@ -23,3 +23,5 @@ with open(csv_file_path, mode='r', newline='') as file:
         scrape(product_code)
 
 create_total_price(datetime.now().date())
+
+print("done")

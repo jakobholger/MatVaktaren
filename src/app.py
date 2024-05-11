@@ -53,7 +53,36 @@ def after_request(response):
 @app.route("/")
 @login_required
 def index():
-    return render_template("index.html")
+    # Connect to DB
+    cursor = get_db().cursor()
+    cursor.execute("""
+    SELECT category, COUNT(*) AS count
+    FROM products
+    GROUP BY category
+    """)
+
+    results = cursor.fetchall()
+
+    df = pd.DataFrame(results, columns=['category', 'count'])
+
+    fig = px.pie(df, values='count', names='category', title='Product Categories Distribution')
+
+    fig.update_layout(
+        autosize=True,
+        margin=dict(l=10, r=10, t=70, b=10),
+        paper_bgcolor="#212529",
+        plot_bgcolor="#37414e",
+        font=dict(color='white'),  # Set the color of all text to white
+        title=dict(font=dict(color='white')),  # Set the color of the title text to white
+        xaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the x-axis title text to white
+        yaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the y-axis title text to white
+        legend=dict(title=dict(font=dict(color='white')), font=dict(color='white')),  # Set the color of legend text to white
+    )
+
+    graph_json = fig.to_json()
+
+
+    return render_template("index.html", graph_json=graph_json)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -259,22 +288,35 @@ def category(category):
         "price_percentage_30_days" : price_percentage_30_days_str
     }
 
+    product_info_data  = cursor.execute("""
+    SELECT id, product_name
+    FROM products
+    WHERE category LIKE ?
+    """, ('%' + category + '%',)).fetchall()
+
+    product_info_dicts = [dict(row) for row in product_info_data]
+
+    price_history_data = []
+    for product in product_info_dicts:
+        history = cursor.execute("SELECT product_id, price, date FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
+        price_history_data.extend(history)
+        product['product_name'] = f"{product['product_name']} (ID: {product['id']})"
+
+
+    # Convert fetched data to DataFrames
+    product_info_df = pd.DataFrame(product_info_dicts, columns=['id', 'product_name'])
+    price_history_df = pd.DataFrame(price_history_data, columns=['product_id', 'date', 'price'])
+
+    # Merge product information with price history
+    merged_df = pd.merge(price_history_df, product_info_df, left_on='product_id', right_on='id')
+
+    # Plot prices over time using Plotly Express
+    fig = px.line(merged_df, x='price', y='date', color='product_name',
+              labels={'date': 'Price', 'price': 'Date', 'product_name': 'Product'})
+
+
     # Convert fetched data into dictionaries
-    data_products = [dict(product) for product in products]
     data_price_history = [dict(row) for row in price_history]
-
-    product_id_to_name = {item['id']: item['product_name'] for item in data_products}
-    # Assign product names to dataPriceHistory items based on their product IDs
-    for d in data_price_history:
-        product_id = d['product_id']
-        product_name = product_id_to_name.get(product_id, 'Unknown Product')
-        d['name'] = f"{product_name} (ID: {product_id})"  # Append product ID to the product name
-
-    # Create DataFrame from price history data
-    df = pd.DataFrame(data_price_history)
-
-    # Plot graph using Plotly Express
-    fig = px.bar(df, x='name', y='price', labels={'price': 'price (kr)'}, title=f'Products Price Over Time')
 
     # Update layout
     fig.update_layout(

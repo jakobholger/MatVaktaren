@@ -10,4 +10,17 @@
     <p>We give you historic values and statistics of food products.</p>
     <p>Feel free to explore the site!</p>
 </div>
+<div id="plotly-graph1" style="height: fit-content; width: 50%; margin: 0 auto;"></div>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    // Parse the Plotly JSON and display the graphs
+    var graphJson = {{ graph_json|safe }};
+
+    Plotly.newPlot('plotly-graph1', graphJson.data, graphJson.layout);
+
+    // Redraw graphs on window resize
+    window.addEventListener('resize', function() {
+        Plotly.Plots.resize('plotly-graph1');
+    });
+</script>
 {% endblock %}

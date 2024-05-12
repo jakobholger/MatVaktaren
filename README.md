@@ -18,6 +18,24 @@ This project is a WebScraper based in Python to gain insight into the change in 
 ## Specific product page
 ![Screenshot 6](screenshots/SpecificProduct.png)
 
+## How to use with Docker
+1. Navigate to the cloned directory
+```
+cd WebscrapeMat
+```
+2. Navigate to the src folder
+```
+cd src
+```
+3. Build Docker image from the dockerfile located in src
+```
+docker build -t <name-of-choice> .
+```
+4. Run image
+```
+docker run -p 3001:3001 <name-of-choice>
+```
+
 ## How to use
 
 1. Clone the repository
@@ -49,24 +67,6 @@ pip install -r requirements.txt
 ```
 #python3 main.py
 flask --app app.py run
-```
-
-## With Docker
-1. Navigate to the cloned directory
-```
-cd WebscrapeMat
-```
-2. Navigate to the src folder
-```
-cd src
-```
-3. Build Docker image from the dockerfile located in src
-```
-docker build -t <name-of-choice> .
-```
-4. Run image
-```
-docker run <name-of-choice>
 ```
 
 

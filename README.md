@@ -51,6 +51,25 @@ pip install -r requirements.txt
 flask --app app.py run
 ```
 
+## With Docker
+1. Navigate to the cloned directory
+```
+cd WebscrapeMat
+```
+2. Navigate to the src folder
+```
+cd src
+```
+3. Build Docker image from the dockerfile located in src
+```
+docker build -t <name-of-choice> .
+```
+4. Run image
+```
+docker run <name-of-choice>
+```
+
+
 ## Exit the program
 ```
 to exit press CTRL + C

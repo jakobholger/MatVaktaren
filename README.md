@@ -22,7 +22,7 @@ This project is a WebScraper based in Python to gain insight into the change in 
 
 1. Clone the repository
 ```
-git clone https://github.com/jakobholger/WebscraperMat.git
+git clone https://github.com/jakobholger/MatVaktaren.git
 ```
 2. Navigate to the cloned directory
 ```

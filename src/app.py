@@ -202,7 +202,7 @@ def product_page(product_code):
 
     df = pd.DataFrame(dataPriceHistory)
 
-    fig = px.line(df, x='date', y='price', labels={'price': 'price'}, title=f'{dict(product)['product_name']} Pris över tid')
+    fig = px.line(df, x='date', y='price', labels={'price': 'Pris (kr)', 'date' : 'Datumn'}, title=f'{dict(product)['product_name']} Pris över tid')
 
     fig.update_layout(
         autosize=True,

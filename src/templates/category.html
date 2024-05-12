@@ -99,7 +99,6 @@
                         <th>Produkt Namn</th>
                         <th>Vikt</th>
                         <th>Kategori</th>
-                        <th>Produkt Kod</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -109,7 +108,6 @@
                         <td><a href="/products/{{ product.product_code }}">{{ product.product_name }}</a></td>
                         <td>{{ product.weight }}</td>
                         <td>{{ product.category }}</td>
-                        <td>{{ product.product_code }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

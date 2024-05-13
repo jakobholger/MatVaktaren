@@ -2,7 +2,7 @@ Stre4K & JakobHolger WebScraper
 ==============================
 
 ## Description of project
-This project is a WebScraper based in Python to gain insight into the change in price for food sold in retail. It is not finished and still work in progress. Currently uses simulated data.
+This project is a Web scraper based in Python to gain insight into the change in price for food sold in retail. It is not finished and still work in progress. Currently uses simulated data. Project consists of a flask web application that serves HTML pages with content from database and an external web scraper based in Python to fetch data from external APIs. The database for this project is SQLITE3.
 
 ## Screenshots
 

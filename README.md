@@ -2,7 +2,7 @@ Stre4K & JakobHolger WebScraper
 ==============================
 
 ## Description of project
-This project is a WebScraper based in Python to gain insight into the change in price for food sold in retail. It is not finished and still work in progress. Currently uses simulated data.
+This project is a Web scraper based in Python to gain insight into the change in price for food sold in retail. It is not finished and still work in progress. Currently uses simulated data. Project consists of a flask web application that serves HTML pages with content from database and an external web scraper based in Python to fetch data from external APIs. The database for this project is SQLITE3.
 
 ## Screenshots
 
@@ -17,6 +17,28 @@ This project is a WebScraper based in Python to gain insight into the change in 
 
 ## Specific product page
 ![Screenshot 6](screenshots/SpecificProduct.png)
+
+## How to use with Docker
+1. Clone the repository
+```
+git clone https://github.com/jakobholger/MatVaktaren.git
+```
+2. Navigate to the cloned directory
+```
+cd WebscrapeMat
+```
+3. Navigate to the src folder
+```
+cd src
+```
+4. Build Docker image from the dockerfile located in src
+```
+docker build -t <name-of-choice> .
+```
+5. Run image
+```
+docker run -p 3001:3001 <name-of-choice>
+```
 
 ## How to use
 
@@ -50,6 +72,7 @@ pip install -r requirements.txt
 #python3 main.py
 flask --app app.py run
 ```
+
 
 ## Exit the program
 ```

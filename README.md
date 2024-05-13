@@ -19,19 +19,23 @@ This project is a WebScraper based in Python to gain insight into the change in 
 ![Screenshot 6](screenshots/SpecificProduct.png)
 
 ## How to use with Docker
-1. Navigate to the cloned directory
+1. Clone the repository
+```
+git clone https://github.com/jakobholger/MatVaktaren.git
+```
+2. Navigate to the cloned directory
 ```
 cd WebscrapeMat
 ```
-2. Navigate to the src folder
+3. Navigate to the src folder
 ```
 cd src
 ```
-3. Build Docker image from the dockerfile located in src
+4. Build Docker image from the dockerfile located in src
 ```
 docker build -t <name-of-choice> .
 ```
-4. Run image
+5. Run image
 ```
 docker run -p 3001:3001 <name-of-choice>
 ```

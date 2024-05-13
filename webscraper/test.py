@@ -10,7 +10,6 @@
 
 
 import sqlite3
-from dbFunctions import add_price_for_product, create_total_price
 import random
 from datetime import datetime, timedelta
 

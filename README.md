@@ -43,7 +43,11 @@ docker build -t <name-of-choice> .
 ```
 6. Run image
 ```
-docker run -p 3001:3001 <name-of-choice>
+docker run -p 3001:3001 <name-of-build>
+```
+7. Stop container
+```
+docker stop <name-of-build>
 ```
 
 ## How to use

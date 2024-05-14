@@ -1,8 +1,12 @@
-import sqlite3
 from datetime import datetime, timedelta
+import pyodbc
+from config import DATABASE_CONFIG
 
-# Define Database File
-dbFile = '../src/site.db'
+def get_db_connection():
+    return pyodbc.connect(
+        f"DRIVER={DATABASE_CONFIG['driver']};SERVER={DATABASE_CONFIG['server']};DATABASE={DATABASE_CONFIG['database']};UID={DATABASE_CONFIG['username']};PWD={DATABASE_CONFIG['password']}"
+    )
+
 
 # Function to add a new price for an existing product
 def add_price_for_product(product_name, price, currency, date, unit, product_code):
@@ -10,7 +14,7 @@ def add_price_for_product(product_name, price, currency, date, unit, product_cod
     
     if product_id is not None:
         # Connect to the database
-        conn = sqlite3.connect(dbFile)
+        conn = get_db_connection()
         cursor = conn.cursor()
 
         cursor.execute('''SELECT max_price, min_price FROM products WHERE id = ?''', (product_id,))
@@ -36,7 +40,7 @@ def add_price_for_product(product_name, price, currency, date, unit, product_cod
 
 # Function to create a new product in the products table
 def create_product(product_name, weight, max_price, min_price, product_code, category):
-    conn = sqlite3.connect(dbFile)
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     product_id = get_product_id(product_code)
@@ -54,7 +58,7 @@ def create_product(product_name, weight, max_price, min_price, product_code, cat
 
 # Function to fetch the product_id based on the product name and store name
 def get_product_id(product_code):
-    conn = sqlite3.connect(dbFile)
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     # Execute a SELECT query to retrieve the product_id
@@ -68,7 +72,7 @@ def get_product_id(product_code):
 
 # Function to query and print all records from the database
 def print_all_records():
-    conn = sqlite3.connect(dbFile)
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     # Query and print all records from the products table
@@ -92,7 +96,7 @@ def print_all_records():
     conn.close()
 
 def check_exists_for_current_date(product_id, date):
-        conn = sqlite3.connect(dbFile)
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(''' SELECT * FROM price_history WHERE product_id = ? AND date = ?''', (product_id, date) )
 
@@ -105,7 +109,7 @@ def check_exists_for_current_date(product_id, date):
 
 def create_total_price(current_date):
     # Create total price for all products
-    conn = sqlite3.connect('../src/site.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     item = cursor.execute('''SELECT * FROM total_price WHERE date = ?''', (current_date,)).fetchall()

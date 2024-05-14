@@ -6,4 +6,5 @@ pandas
 plotly.express
 datetime
 pandas_market_calendars
-
+python-dotenv
+pyodbc

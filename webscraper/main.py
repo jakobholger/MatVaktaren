@@ -1,6 +1,3 @@
-import requests
-import json
-import sqlite3
 from scraperFunction import scrape
 from datetime import datetime
 import csv

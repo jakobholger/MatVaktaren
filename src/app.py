@@ -8,38 +8,24 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime, timedelta
 
-import sqlite3
+import pyodbc
+from config import DATABASE_CONFIG
 
 # Configure application
 app = Flask(__name__)
 
-# DB File configure
-from dbConfig import configure_database
+
+def get_db_connection():
+    return pyodbc.connect(
+        f"DRIVER={DATABASE_CONFIG['driver']};SERVER={DATABASE_CONFIG['server']};DATABASE={DATABASE_CONFIG['database']};UID={DATABASE_CONFIG['username']};PWD={DATABASE_CONFIG['password']}"
+    )
+
 
 # Configure session to use filesystem (instead of signed cookies)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-app.config["DATABASE"] = "site.db"
 Session(app)
 
-# Configure Database if not setup
-configure_database(app.config['DATABASE'])
-
-def get_db():
-    db = getattr(g, '_database', None)
-    if db is None:
-        db = g._database = sqlite3.connect(
-            app.config['DATABASE'],
-            detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        db.row_factory = sqlite3.Row
-    return db
-
-@app.teardown_appcontext
-def close_db(exception=None):
-    db = getattr(g, '_database', None)
-    if db is not None:
-        db.close()
 
 @app.after_request
 def after_request(response):
@@ -49,12 +35,22 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+def get_list_of_dict(keys, list_of_tuples):
+    """
+    This function will accept keys and list_of_tuples as args and return list of dicts
+    """
+    list_of_dict = [
+        dict(zip(keys, values))
+        for values in list_of_tuples
+    ]
+    return list_of_dict
 
 @app.route("/")
 #@login_required
 def index():
     # Connect to DB
-    cursor = get_db().cursor()
+    connection = get_db_connection()
+    cursor = connection.cursor()
     cursor.execute("""
     SELECT category, COUNT(*) AS count
     FROM products
@@ -63,7 +59,13 @@ def index():
 
     results = cursor.fetchall()
 
-    df = pd.DataFrame(results, columns=['category', 'count'])
+    keys = ("category", "count")
+
+    list_of_results = get_list_of_dict(keys, results)
+
+    connection.close()
+    
+    df = pd.DataFrame(list_of_results, columns=['category', 'count'])
 
     fig = px.pie(df, values='count', names='category', labels={'category': 'Kategori', 'count': 'Antal produkter'}, title='Produkt Kategori Distribution')
 
@@ -104,7 +106,8 @@ def login():
             return apology("must provide password", 400)
 
         # Connect to DB
-        cursor = get_db().cursor()
+        connection = get_db_connection()
+        cursor = connection.cursor()
         username = request.form.get("username")
         password = request.form.get("password")
 
@@ -129,14 +132,43 @@ def login():
 @app.route('/products/<product_code>')
 def product_page(product_code):
     # Connect to DB
-    cursor = get_db().cursor()
+    connection = get_db_connection()
+    cursor = connection.cursor()
 
-    # Query database for products and prices
+    # Query database for product
     product = cursor.execute("SELECT * FROM products WHERE product_code = ?", (product_code,)).fetchone()
-    priceHistory = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
+    if product is None:
+        connection.close()
+        return apology("Product not found", 404)
+    
+    # Convert product tuple to dictionary
+    product_dict = {
+        'id': product[0],
+        'product_name': product[1],
+        'weight': product[2],
+        'max_price': product[3],
+        'min_price': product[4],
+        'category': product[5],
+        'product_code': product[6]
+}
+    
+    priceHistory = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product_dict['id'],)).fetchall()
+
+    connection.close()
+    priceHistory_list = []
+    # Convert price history to dictionary or list of dictionaries based on length
+    for row in priceHistory:
+        priceHistory_list.append({
+        'id': row[0],
+        'product_id': row[1],
+        'price': row[2],
+        'currency': row[3],
+        'unit': row[4],
+        'date': row[5]
+        })
 
     # Calculate average price
-    average_price = round(sum(row['price'] for row in priceHistory) / len(priceHistory),2)
+    average_price = round(sum(row['price'] for row in priceHistory_list) / len(priceHistory_list),2)
 
     # Calculate the dates for different time periods
     current_date = datetime.now().date()
@@ -155,7 +187,7 @@ def product_page(product_code):
     price_changes_14_days = "N/A"
     price_changes_30_days = "N/A"
 
-    for row in priceHistory:
+    for row in priceHistory_list:
         if row['date'] == current_date:
             current_price = row['price']
 
@@ -184,8 +216,8 @@ def product_page(product_code):
     # Create a dictionary with all the values
     product_metrics = {
         "current_price": current_price,
-        "all_time_high": product['max_price'],
-        "all_time_low": product['min_price'],
+        "all_time_high": product_dict['max_price'],
+        "all_time_low": product_dict['min_price'],
         "average_price": average_price,
         "price_change_7_days": price_change_7_days,
         "price_percentage_7_days" : price_percentage_7_days,
@@ -195,14 +227,9 @@ def product_page(product_code):
         "price_percentage_30_days" : price_percentage_30_days
     }
 
-    # Return dictionarie with data of price_history
-    dataPriceHistory = []
-    for row in priceHistory:
-        dataPriceHistory.append(dict(row))
+    df = pd.DataFrame(priceHistory_list)
 
-    df = pd.DataFrame(dataPriceHistory)
-
-    fig = px.line(df, x='date', y='price', labels={'price': 'Pris (kr)', 'date' : 'Datumn'}, title=f'{dict(product)['product_name']} Pris över tid')
+    fig = px.line(df, x='date', y='price', labels={'price': 'Pris (kr)', 'date' : 'Datumn'}, title=f'{dict(product_dict)['product_name']} Pris över tid')
 
     fig.update_layout(
         autosize=True,
@@ -219,7 +246,7 @@ def product_page(product_code):
     graph_json = fig.to_json()
 
     # and render the corresponding template
-    return render_template('specificProduct.html', graph_json=graph_json, product=product, price_history=priceHistory, product_metrics=product_metrics)
+    return render_template('specificProduct.html', graph_json=graph_json, product=product_dict, price_history=priceHistory_list, product_metrics=product_metrics)
 
 @app.route('/products/category/<category>', methods=['GET', 'POST'])
 def category(category):
@@ -230,7 +257,8 @@ def category(category):
         return redirect(url_for('category', category=selected_category))
 
     # Connect to DB
-    cursor = get_db().cursor()
+    connection = get_db_connection()
+    cursor = connection.cursor()
 
     # Query database for products where the category column contains the specified category
     query = "SELECT * FROM products WHERE category LIKE ?"
@@ -239,23 +267,27 @@ def category(category):
     # Ensure products were found
     if not products:
         return apology("No products found in the specified category", 400)
+    
+
+    product_keys = ("id", "product_name", "weight", "max_price", "min_price", "category", "product_code")
+    product_list = get_list_of_dict(product_keys, products)
 
 
     current_date = datetime.now().date()
     # Fetch price history for each product
     price_history = []
-    for product in products:
+    for product in product_list:
         history = cursor.execute("SELECT * FROM price_history WHERE product_id = ? AND date = ?", (product['id'], current_date,)).fetchall()
-        price_history.extend(history)
+        price_history.extend(get_list_of_dict(("id", "product_id", "price", "currency", "unit", "date"), history))
 
     # Ensure price history was found
     if not price_history:
         return apology("No price history found for the products in the specified category", 400)
     
     price_stats = []
-    for product in products:
+    for product in product_list:
         item = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
-        price_stats.extend(item)
+        price_stats.extend(get_list_of_dict(("id", "product_id", "price", "currency", "unit", "date"),item))
 
     if not price_stats:
         return apology("No price history found for the products in the specified category", 400)
@@ -305,25 +337,27 @@ def category(category):
     WHERE category LIKE ?
     """, ('%' + category + '%',)).fetchall()
 
-    product_info_dicts = [dict(row) for row in product_info_data]
+    product_info_keys = ("id", "product_name")
+    product_info_list = get_list_of_dict(product_info_keys, product_info_data)
 
     price_history_data = []
-    for product in product_info_dicts:
+    for product in product_info_list:
         history = cursor.execute("SELECT product_id, price, date FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
-        price_history_data.extend(history)
+        price_history_data.extend(get_list_of_dict(("product_id", "price", "date"),history))
         product['product_name'] = f"{product['product_name']} (ID: {product['id']})"
 
+    connection.close()
 
     # Convert fetched data to DataFrames
-    product_info_df = pd.DataFrame(product_info_dicts, columns=['id', 'product_name'])
+    product_info_df = pd.DataFrame(product_info_list, columns=['id', 'product_name'])
     price_history_df = pd.DataFrame(price_history_data, columns=['product_id', 'date', 'price'])
 
     # Merge product information with price history
     merged_df = pd.merge(price_history_df, product_info_df, left_on='product_id', right_on='id')
 
     # Plot prices over time using Plotly Express
-    fig = px.line(merged_df, x='price', y='date', color='product_name',
-              labels={'date': 'Pris (kr)', 'price': 'Datumn', 'product_name': 'Produkt'}, title='Prisutveckling av kategorins produkter över tid')
+    fig = px.line(merged_df, x='date', y='price', color='product_name',
+              labels={'date': 'Datumn', 'price': 'Pris (kr)', 'product_name': 'Produkt'}, title='Prisutveckling av kategorins produkter över tid')
 
 
     # Convert fetched data into dictionaries
@@ -372,25 +406,25 @@ def product():
         return redirect(url_for('category', category=selected_category))
     
     # Connect to DB
-    cursor = get_db().cursor()
+    connection = get_db_connection()
+    cursor = connection.cursor()
 
     # Query database for products and prices
     products = cursor.execute("SELECT * FROM products").fetchall()
     priceHistory = cursor.execute("SELECT * FROM price_history WHERE date = ?", (datetime.now().date(),)).fetchall()
 
+
+
     # Ensure Data was not empty
     if not priceHistory or not products:
         return apology("no products found", 400)
 
-    # Return dictionarie with data of products
-    dataProducts = []
-    for product in products:
-        dataProducts.append(dict(product))
+    # Convert each row of products into dictionaries
+    dataProducts = [dict(zip(('id', 'product_name', 'quantity', 'price', 'price_per_unit', 'category', 'product_code'), product)) for product in products]
 
-    # Return dictionarie with data of price_history
-    dataPriceHistory = []
-    for row in priceHistory:
-        dataPriceHistory.append(dict(row))
+    # Convert each row of priceHistory into dictionaries
+    dataPriceHistory = [dict(zip(('id', 'product_id', 'price', 'currency', 'unit', 'date'), price)) for price in priceHistory]
+
 
     # Create a dictionary to map product IDs to product names
     product_id_to_name = {item['id']: item['product_name'] for item in dataProducts}
@@ -422,22 +456,20 @@ def product():
 
 
     total_prices = cursor.execute("SELECT * FROM total_price").fetchall()
+    total_price_history = [dict(zip(('id', 'value', 'date'), price)) for price in total_prices]
+
+    connection.close()
 
         # Ensure Data was not empty
     if not total_prices:
         return apology("no total prices found", 400)
-    
-    total_prices_dic = []
-    for row in total_prices:
-        total_prices_dic.append(dict(row))
-
 
         # Find all-time high and all-time low prices
-    all_time_high = max(row['value'] for row in total_prices)
-    all_time_low = min(row['value'] for row in total_prices)
+    all_time_high = max(row['value'] for row in total_price_history)
+    all_time_low = min(row['value'] for row in total_price_history)
 
     # Calculate average price
-    average_price = round(sum(row['value'] for row in total_prices) / len(total_prices),2)
+    average_price = round(sum(row['value'] for row in total_price_history) / len(total_price_history),2)
 
     # Calculate the dates for different time periods
     current_date = datetime.now().date()
@@ -454,7 +486,7 @@ def product():
     price_percentage_14_days = "N/A"
     price_percentage_30_days = "N/A"
 
-    for row in total_prices:
+    for row in total_price_history:
         if row['date'] == current_date:
             current_price = row['value']
         if row['date'] == seven_days_ago:
@@ -484,7 +516,7 @@ def product():
         "price_percentage_30_days" : price_percentage_30_days
     }
 
-    dataframe = pd.DataFrame(total_prices_dic)
+    dataframe = pd.DataFrame(total_price_history)
 
     fig2 = px.line(dataframe, x='date', y='value', labels={'price': 'Pris (kr)', 'value' : 'Värde', 'date' : 'Datumn'}, title= 'Total summa av samtliga produktpriser som spåras över tid')
 
@@ -573,7 +605,8 @@ def register():
             return apology("passwords does not match", 400)
 
         # DB Connect
-        cursor = get_db().cursor()
+        connection = get_db_connection()
+        cursor = connection.cursor()
 
         # Query database for username
         rows = cursor.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchall()
@@ -604,6 +637,7 @@ def register():
             # Handle the case where the user was not found
             return apology("Failed to fetch user information", 500)
 
+        connection.close()
         # Redirect user to home page
         return redirect("/")
 

@@ -2,7 +2,7 @@ Stre4K & JakobHolger WebScraper
 ==============================
 
 ## Description of project
-This project is a Web scraper based in Python to gain insight into the change in price for food sold in retail. It is not finished and still work in progress. Currently uses simulated data. Project consists of a flask web application that serves HTML pages with content from database and an external web scraper based in Python to fetch data from external APIs. The database for this project is SQLITE3.
+This project is a Web scraper based in Python to gain insight into the change in price for food sold in retail. It is not finished and still work in progress. Currently uses simulated data. Project consists of a flask web application that serves HTML pages with content from a database and an external web scraper based in Python to fetch data from external APIs. For this project we are using Microsofts SQL Server in the cloud (Azure) for our database. To set this project up you will need to create your own database and set it up in a config file.
 
 ## Screenshots
 
@@ -27,15 +27,17 @@ git clone https://github.com/jakobholger/MatVaktaren.git
 ```
 cd WebscrapeMat
 ```
-3. Navigate to the src folder
+3. Create an SQL server and Database locally or in the cloud and connect to the server using the credentials which are placed inside a config.py file. Please consider another method like environment due to safety issues.
+
+4. Navigate to the src folder
 ```
 cd src
 ```
-4. Build Docker image from the dockerfile located in src
+5. Build Docker image from the dockerfile located in src
 ```
 docker build -t <name-of-choice> .
 ```
-5. Run image
+6. Run image
 ```
 docker run -p 3001:3001 <name-of-choice>
 ```
@@ -50,11 +52,13 @@ git clone https://github.com/jakobholger/MatVaktaren.git
 ```
 cd WebscrapeMat
 ```
-3. Initialise the virtual environment
+3. Create an SQL server and Database locally or in the cloud and connect to the server using the credentials which are placed inside a config.py file. Please consider another method like environment due to safety issues.
+   
+4. Initialise the virtual environment
 ```
 python3 -m venv venv
 ```
-4. Activate the virtual environment
+5. Activate the virtual environment
 MACOS
 ```
 source venv/bin/activate
@@ -63,11 +67,11 @@ WINDOWS
 ```
 venv\Scripts\activate.bat
 ```
-5. Install requirements
+6. Install requirements
 ```
 pip install -r requirements.txt
 ```
-6. Run the program
+7. Run the program
 ```
 #python3 main.py
 flask --app app.py run

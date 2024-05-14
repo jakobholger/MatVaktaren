@@ -1,8 +1,12 @@
-Stre4K & JakobHolger WebScraper
+Stre4K & Jakobholger WebScraper
 ==============================
 
 ## Description of project
 This project is a Web scraper based in Python to gain insight into the change in price for food sold in retail. It is not finished and still work in progress. Currently uses simulated data. Project consists of a flask web application that serves HTML pages with content from a database and an external web scraper based in Python to fetch data from external APIs. For this project we are using Microsofts SQL Server in the cloud (Azure) for our database. To set this project up you will need to create your own database locally or in the cloud and set up the SQL credentials in a config file in the src folder and the webscraper folder. 
+
+## Website
+
+You can access the website [here](https://matpris-vaktaren.mangopebble-6ebcdb4f.swedencentral.azurecontainerapps.io/). I might take 10-15 seconds for Azure to spin up the container. Thanks for your patience!
 
 ## Screenshots
 
@@ -39,7 +43,11 @@ docker build -t <name-of-choice> .
 ```
 6. Run image
 ```
-docker run -p 3001:3001 <name-of-choice>
+docker run -p 3001:3001 <name-of-build>
+```
+7. Stop container
+```
+docker stop <name-of-build>
 ```
 
 ## How to use
@@ -76,14 +84,11 @@ pip install -r requirements.txt
 #python3 main.py
 flask --app app.py run
 ```
-
-
-## Exit the program
+8. Exit the program
 ```
 to exit press CTRL + C
 ```
-
-## To leave virtual environment
+9. To leave virtual environment
 ```
 deactivate
 ```

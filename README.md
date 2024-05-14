@@ -84,14 +84,11 @@ pip install -r requirements.txt
 #python3 main.py
 flask --app app.py run
 ```
-
-
-## Exit the program
+8. Exit the program
 ```
 to exit press CTRL + C
 ```
-
-## To leave virtual environment
+9. To leave virtual environment
 ```
 deactivate
 ```

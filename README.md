@@ -1,5 +1,8 @@
 Stre4K & JakobHolger WebScraper
 ==============================
+## Website
+
+You can access the website [here](https://matpris-vaktaren.mangopebble-6ebcdb4f.swedencentral.azurecontainerapps.io/).
 
 ## Description of project
 This project is a Web scraper based in Python to gain insight into the change in price for food sold in retail. It is not finished and still work in progress. Currently uses simulated data. Project consists of a flask web application that serves HTML pages with content from a database and an external web scraper based in Python to fetch data from external APIs. For this project we are using Microsofts SQL Server in the cloud (Azure) for our database. To set this project up you will need to create your own database locally or in the cloud and set up the SQL credentials in a config file in the src folder and the webscraper folder. 

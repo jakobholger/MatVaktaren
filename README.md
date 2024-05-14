@@ -6,7 +6,7 @@ This project is a Web scraper based in Python to gain insight into the change in
 
 ## Website
 
-You can access the website [here](https://matpris-vaktaren.mangopebble-6ebcdb4f.swedencentral.azurecontainerapps.io/).
+You can access the website [here](https://matpris-vaktaren.mangopebble-6ebcdb4f.swedencentral.azurecontainerapps.io/). I might take 10-15 seconds for Azure to spin up the container. Thanks for your patience!
 
 ## Screenshots
 

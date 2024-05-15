@@ -1,4 +1,4 @@
-Stre4K & jakobholger WebScraper
+Stre4K & jakobholger Web scraper
 ==============================
 
 ## Description of project

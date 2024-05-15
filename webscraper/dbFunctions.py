@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import pyodbc
-from config import DATABASE_CONFIG
+from dbConfig import DATABASE_CONFIG
 
 def get_db_connection():
     return pyodbc.connect(

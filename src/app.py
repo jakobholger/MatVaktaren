@@ -9,7 +9,7 @@ import plotly.express as px
 from datetime import datetime, timedelta
 
 import pyodbc
-from config import DATABASE_CONFIG
+from dbConfig import DATABASE_CONFIG
 
 # Configure application
 app = Flask(__name__)

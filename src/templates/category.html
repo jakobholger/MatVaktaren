@@ -48,7 +48,9 @@
 </script>
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<div id="plotly-graph" style="height: fit-content; margin: 0 auto; width: 80%;"></div>
+<div class="plotly-container">
+    <div id="plotly-graph"></div>
+</div>
 <script>
     // Parse the Plotly JSON and display the graph
     var graphJson = {{ graph_json|safe }};
@@ -125,7 +127,7 @@
                         <th>Produkt ID</th>
                         <th>Pris</th>
                         <th>Jmf-pris</th>
-                        <th>Datumn</th>
+                        <th>Datum</th>
                     </tr>
                 </thead>
                 <tbody>

@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 import pyodbc
-from dbConfig import DATABASE_CONFIG
+from config import DATABASE_CONFIG
 
 def get_db_connection():
     return pyodbc.connect(
@@ -107,7 +107,9 @@ def check_exists_for_current_date(product_id, date):
             return False
         return True
 
-def create_total_price(current_date):
+def create_total_price():
+    current_date = datetime.now().date()
+
     # Create total price for all products
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -115,11 +117,23 @@ def create_total_price(current_date):
     item = cursor.execute('''SELECT * FROM total_price WHERE date = ?''', (current_date,)).fetchall()
 
     if len(item) == 0:
-        prices = cursor.execute('''SELECT * FROM price_history WHERE date = ?''', (current_date,)).fetchall()
-
         total_sum = 0
-        for price in prices:
-            total_sum += price[2]
+        products = cursor.execute('''SELECT * FROM products''').fetchall()
+
+        for product in products:
+            exists = False
+            time_delta = 0
+
+            while not exists:
+                price = cursor.execute('''SELECT * FROM price_history WHERE product_id = ? AND date = ?''',(product[0], current_date - timedelta(days=time_delta),)).fetchall()
+                time_delta+=1
+
+                if price:
+                    exists = True
+                    total_sum += price[0][2]
+                if time_delta > 7:
+                    exists = True
+                    print("No previous price was found within 7 days ago.")
 
         cursor.execute('''INSERT INTO total_price (value, date) VALUES (?, ?)''', (total_sum, current_date,))
 
@@ -130,5 +144,31 @@ def create_total_price(current_date):
         print("Total price already exists for this day.")
         conn.close()
 
+def create_price_for_existing_product(product_code):
+    current_date = datetime.now().date()
+
+    # Create total price for all products
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    product = cursor.execute('''SELECT * FROM products WHERE product_code = ?''', (product_code,)).fetchone()
+
+    exists = False
+    time_delta = 1
+
+
+    while not exists:
+        price = cursor.execute('''SELECT * FROM price_history WHERE product_id = ? AND date = ?''',(product[0], current_date - timedelta(days=time_delta),)).fetchone()
+        time_delta+=1
+
+        if price:
+            exists = True
+            cursor.execute('''INSERT INTO price_history (product_id, price, currency, unit, date) VALUES (?, ?, ?, ?, ?)''', (product[0], price[2], price[3], price[4], current_date))
+
+        if time_delta > 7:
+            exists = True
+            print("No previous price was found within 7 days ago.")
+    conn.commit()
+    conn.close()
 
 #Import in other python file

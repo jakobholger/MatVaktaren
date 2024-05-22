@@ -1,6 +1,6 @@
 import requests
 import json
-from dbFunctions import create_product, add_price_for_product, check_exists_for_current_date, get_product_id
+from dbFunctions import create_product, add_price_for_product, check_exists_for_current_date, get_product_id, create_price_for_existing_product
 from datetime import datetime
 
 
@@ -10,24 +10,26 @@ headers = {
 
 date = datetime.now().date()
 
-def scrape(productCode):
-    product_id = get_product_id(productCode)
+def scrape(product_code):
+    product_id = get_product_id(product_code)
     #Check if it already exists for today
     if check_exists_for_current_date(product_id, date):
-        url = 'https://www.willys.se/axfood/rest/p/' + productCode
+        url = 'https://www.willys.se/axfood/rest/p/' + product_code
         response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
             html_content = response.text
 
-            parse_html(html_content, productCode)
+            parse_html(html_content, product_code)
 
         else:
             print("Something went wrong! Status code: " + (str)(response.status_code))
+            print("Fetching from previous date.")
+            create_price_for_existing_product(product_code)
     else:
         print("Product price already exists for this date.")
 
-def parse_html(html_content, productCode):
+def parse_html(html_content, product_code):
     json_data = json.loads(html_content)
     #print(type(json_data))
 
@@ -38,5 +40,5 @@ def parse_html(html_content, productCode):
 
     print(json_data['name'], "|", json_data['price'], json_data['currency'], "/", json_data['displayVolume'], "|", json_data['comparePrice'], "/", json_data['comparePriceUnit'])
 
-    create_product(json_data['name'], json_data['displayVolume'], json_data['price'], json_data['price'], productCode, json_data['googleAnalyticsCategory'])
-    add_price_for_product(json_data['name'], json_data['price'], json_data['currency'], date, json_data['comparePrice'] + "/" + json_data['comparePriceUnit'], productCode)
+    create_product(json_data['name'], json_data['displayVolume'], json_data['price'], json_data['price'], product_code, json_data['googleAnalyticsCategory'])
+    add_price_for_product(json_data['name'], json_data['price'], json_data['currency'], date, json_data['comparePrice'] + "/" + json_data['comparePriceUnit'], product_code)

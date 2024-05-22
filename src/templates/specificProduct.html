@@ -11,7 +11,9 @@
 <u><h1>{{product.product_name}}</h1></u>
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<div id="plotly-graph" style="height: fit-content; width: 80%; margin: 0 auto;"></div>
+<div class="plotly-container">
+    <div id="plotly-graph"></div>
+</div>
 <script>
     // Parse the Plotly JSON and display the graph
     var graphJson = {{ graph_json|safe }};
@@ -32,6 +34,8 @@
             <th>Högsta pris (kr)</th>
             <th>Lägsta pris (kr)</th>
             <th>Genomsnittligt pris (kr)</th>
+            <th>Prisförändring senaste 24 timmarna (kr)</th>
+            <th>Prisförändring senaste 24 timmarna (%)</th>
             <th>Prisförändring senaste 7 Dagarna (kr)</th>
             <th>Prisförändring senaste 7 Dagarna (%)</th>
             <th>Prisförändring senaste 14 Dagarna (kr)</th>
@@ -51,6 +55,8 @@
             <td>{{product_metrics.all_time_high}}</td>
             <td>{{product_metrics.all_time_low}}</td>
             <td>{{product_metrics.average_price}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_change_yesterday != 'N/A' and product_metrics.price_change_yesterday >= 0 else 'red' }}">{{product_metrics.price_change_yesterday}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_percentage_yesterday != 'N/A' and product_metrics.price_percentage_yesterday >= 0 else 'red' }}">{{product_metrics.price_percentage_yesterday}}</td>
             <td style="color: {{ 'green' if product_metrics.price_change_7_days != 'N/A' and product_metrics.price_change_7_days >= 0 else 'red' }}">{{product_metrics.price_change_7_days}}</td>
             <td style="color: {{ 'green' if product_metrics.price_percentage_7_days != 'N/A' and product_metrics.price_percentage_7_days >= 0 else 'red' }}">{{product_metrics.price_percentage_7_days}}</td>
             <td style="color: {{ 'green' if product_metrics.price_change_14_days != 'N/A' and product_metrics.price_change_14_days >= 0 else 'red' }}">{{product_metrics.price_change_14_days}}</td>
@@ -72,7 +78,7 @@
 <table>
     <thead>
         <tr>
-            <th>Datumn</th>
+            <th>Datum</th>
             <th>Pris (kr)</th>
             <th>Jmf-pris</th>
         </tr>

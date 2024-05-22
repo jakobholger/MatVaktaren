@@ -19,6 +19,6 @@ with open(csv_file_path, mode='r', newline='') as file:
         product_code = row[1]
         scrape(product_code)
 
-create_total_price(datetime.now().date())
+create_total_price()
 
 print("done")

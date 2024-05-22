@@ -1,8 +1,8 @@
-Stre4K & Jakobholger WebScraper
+Stre4K & jakobholger Web Scraper
 ==============================
 
 ## Description of project
-This project is a Web scraper based in Python to gain insight into the change in price for food sold in retail. It is not finished and still work in progress. Currently uses simulated data. Project consists of a flask web application that serves HTML pages with content from a database and an external web scraper based in Python to fetch data from external APIs. For this project we are using Microsofts SQL Server in the cloud (Azure) for our database. To set this project up you will need to create your own database locally or in the cloud and set up the SQL credentials in a config file in the src folder and the webscraper folder. 
+This project is a Web scraper based in Python to gain insight into the change in price for food sold in retail. It is not finished and still work in progress. Currently uses simulated data. Project consists of a flask web application that serves HTML pages with content from a database and an external web scraper based in Python to fetch data from external APIs. For this project we are using Microsofts SQL Server in the cloud (Azure) for our database. To set this project up you will need to create your own database locally or in the cloud and set up the SQL credentials in the dbConfig file in the src folder and the webscraper folder. The project is still WORK IN PROGRESS and has issues with Mobile Friendly UI and graphs when products are removed from the API.
 
 ## Website
 
@@ -31,7 +31,7 @@ git clone https://github.com/jakobholger/MatVaktaren.git
 ```
 cd WebscrapeMat
 ```
-3. Create an SQL server and Database locally or in the cloud and connect to the server using the credentials which are placed inside a config.py file. Please consider another method like environment due to safety issues.
+3. Create an SQL server and Database locally or in the cloud and connect to the server using the credentials which are to be placed inside the dbConfig.py file. Please consider another method like environment due to safety issues.
 
 4. Navigate to the src folder
 ```
@@ -60,7 +60,7 @@ git clone https://github.com/jakobholger/MatVaktaren.git
 ```
 cd WebscrapeMat
 ```
-3. Create an SQL server and Database locally or in the cloud and connect to the server using the credentials which are placed inside a config.py file. Please consider another method like environment due to safety issues.
+3. Create an SQL server and Database locally or in the cloud and connect to the server using the credentials which are to be placed inside the dbConfig.py file. Please consider another method like environment due to safety issues.
    
 4. Initialise the virtual environment
 ```

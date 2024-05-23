@@ -6,6 +6,18 @@
 
 {% block main %}
 
+<style>
+    th, td {
+        border: 1px solid #ddd;
+    }
+    @media screen and (max-width: 600px) {
+        th, td {
+            font-size: 9px;  /* Adjust font size for smaller screens */
+            padding: 4px;     /* Reduce padding */
+        }
+    }
+</style>
+
 <td><a href="/products"><h4>Gå tillbaka</h4></a></td>
 
 <u><h1>{{product.product_name}}</h1></u>
@@ -13,6 +25,77 @@
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <div class="plotly-container">
     <div id="plotly-graph"></div>
+    <u style="color: black;"><h3>Prisstatistik för produkten</h3></u>
+<table style="height: 0.5%;">
+    <thead>
+        <tr>
+            <th>Snitt pris (kr)</th>
+            <th>Prisförändring senaste dygnet (kr / %)</th>
+            <th>Prisförändring senaste 7 Dagarna (kr / %)</th>
+            <th>Prisförändring senaste 14 Dagarna (kr / %)</th>
+            <th>Prisförändring senaste 30 Dagarna (kr / %)</th>
+            <!--
+            <th>Price change last 6 Months (kr / %)</th>
+            <th>Price change last Year (kr / %)</th>
+            -->
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{product_metrics.average_price}}</td>
+            <td style="color: {{ 'green' if product_metrics.price_change_yesterday != 'N/A' and product_metrics.price_change_yesterday >= 0 else 'red' }}">
+                {{ product_metrics.price_change_yesterday }}
+                {% if product_metrics.price_percentage_yesterday != 'N/A' %}
+                    / {{ product_metrics.price_percentage_yesterday }}%
+                {% endif %}
+            </td>
+            <td style="color: {{ 'green' if product_metrics.price_change_7_days != 'N/A' and product_metrics.price_change_7_days >= 0 else 'red' }}">
+                {{ product_metrics.price_change_7_days }}
+                {% if product_metrics.price_percentage_7_days != 'N/A' %}
+                    / {{ product_metrics.price_percentage_7_days }}%
+                {% endif %}
+            </td>
+            <td style="color: {{ 'green' if product_metrics.price_change_14_days != 'N/A' and product_metrics.price_change_14_days >= 0 else 'red' }}">
+                {{ product_metrics.price_change_14_days }}
+                {% if product_metrics.price_percentage_14_days != 'N/A' %}
+                    / {{ product_metrics.price_percentage_14_days }}%
+                {% endif %}
+            </td>
+            <td style="color: {{ 'green' if product_metrics.price_change_30_days != 'N/A' and product_metrics.price_change_30_days >= 0 else 'red' }}">
+                {{ product_metrics.price_change_30_days }}
+                {% if product_metrics.price_percentage_30_days != 'N/A' %}
+                    / {{ product_metrics.price_percentage_30_days }}%
+                {% endif %}
+            </td>            <!--
+            <td>Price change last 6 Months (kr / %)</td>
+            <td>Price change last Year (kr / %)</td>
+            -->
+        </tr>
+    </tbody>
+</table>
+
+<br>
+<table style="height: 0.5%;">
+    <thead>
+        <tr>
+            <th>Nuvarande pris (kr)</th>
+            <th>Nuvarande Jmf-pris</th>
+            <th>Högsta pris (kr)</th>
+            <th>Lägsta pris (kr)</th>
+            <th>Nuvarande Vikt / Volym</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{product_metrics.current_price }}</td>
+            <td>{{product_metrics.compare_price }}</td>
+            <td>{{product.max_price}}</td   >
+            <td>{{product.min_price}}</td>
+            <td>{{product.weight }}</td>
+        </tr>
+    </tbody>
+</table>
+
 </div>
 <script>
     // Parse the Plotly JSON and display the graph
@@ -20,79 +103,5 @@
     Plotly.newPlot('plotly-graph', graphJson.data, graphJson.layout);
 </script>
 
-<hr>
-
-<u><h3>Nuvarande pris: {{product_metrics.current_price}} kr</h3></u>
-
-
-<hr>
-
-<u><h3>Prisstatistik för produkten</h3></u>
-<table style="height: 1%;">
-    <thead>
-        <tr>
-            <th>Högsta pris (kr)</th>
-            <th>Lägsta pris (kr)</th>
-            <th>Genomsnittligt pris (kr)</th>
-            <th>Prisförändring senaste 24 timmarna (kr)</th>
-            <th>Prisförändring senaste 24 timmarna (%)</th>
-            <th>Prisförändring senaste 7 Dagarna (kr)</th>
-            <th>Prisförändring senaste 7 Dagarna (%)</th>
-            <th>Prisförändring senaste 14 Dagarna (kr)</th>
-            <th>Prisförändring senaste 14 Dagarna (%)</th>
-            <th>Prisförändring senaste 30 Dagarna (kr)</th>
-            <th>Prisförändring senaste 30 Dagarna (%)</th>
-            <!--
-            <th>Price change last 6 Months (kr)</th>
-            <th>Price change last 6 Months (%)</th>
-            <th>Price change last Year (kr)</th>
-            <th>Price change last Year (%)</th>
-            -->
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>{{product_metrics.all_time_high}}</td>
-            <td>{{product_metrics.all_time_low}}</td>
-            <td>{{product_metrics.average_price}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_change_yesterday != 'N/A' and product_metrics.price_change_yesterday >= 0 else 'red' }}">{{product_metrics.price_change_yesterday}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_percentage_yesterday != 'N/A' and product_metrics.price_percentage_yesterday >= 0 else 'red' }}">{{product_metrics.price_percentage_yesterday}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_change_7_days != 'N/A' and product_metrics.price_change_7_days >= 0 else 'red' }}">{{product_metrics.price_change_7_days}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_percentage_7_days != 'N/A' and product_metrics.price_percentage_7_days >= 0 else 'red' }}">{{product_metrics.price_percentage_7_days}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_change_14_days != 'N/A' and product_metrics.price_change_14_days >= 0 else 'red' }}">{{product_metrics.price_change_14_days}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_percentage_14_days != 'N/A' and product_metrics.price_percentage_14_days >= 0 else 'red' }}">{{product_metrics.price_percentage_14_days}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_change_30_days != 'N/A' and product_metrics.price_change_30_days >= 0 else 'red' }}">{{product_metrics.price_change_30_days}}</td>
-            <td style="color: {{ 'green' if product_metrics.price_percentage_30_days != 'N/A' and product_metrics.price_percentage_30_days >= 0 else 'red' }}">{{product_metrics.price_percentage_30_days}}</td>
-            <!--
-            <td>Price change last 6 Months (kr)</td>
-            <td>Price change last 6 Months (%)</td>
-            <td>Price change last Year (kr)</td>
-            <td>Price change last Year (%)</td>
-            -->
-        </tr>
-    </tbody>
-</table>
-
-
-<div style="height: 300px; overflow-y: auto;">
-<table>
-    <thead>
-        <tr>
-            <th>Datum</th>
-            <th>Pris (kr)</th>
-            <th>Jmf-pris</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in price_history %}
-        <tr>
-            <td>{{ item.date }}</td>
-            <td>{{ item.price }}</td>
-            <td>{{ item.unit }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-</div>
 
 {% endblock %}

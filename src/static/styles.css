@@ -62,7 +62,7 @@ nav .navbar-brand .green
 }
 
 th, td {
-    border: 1px solid #212529; /* Darker border color for a dark background */
+    border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
     background-color: #464f57 /* Even darker gray background color for cells */
@@ -420,8 +420,18 @@ p {
     display: none;
 }
 
+/* Responsive adjustments */
 @media screen and (max-width: 600px) {
     th, td {
-        font-size: 12px;
+        padding: 4px 6px;
+        font-size: 9px;
+    }
+
+    th, td:nth-of-type(1) {
+        width: 25%;
+    }
+
+    th, td:nth-of-type(2), th, td:nth-of-type(3), th, td:nth-of-type(4), th, td:nth-of-type(5), th, td:nth-of-type(6), th, td:nth-of-type(7) {
+        width: 12.5%;
     }
 }

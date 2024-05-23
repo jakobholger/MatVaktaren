@@ -6,6 +6,18 @@
 
 {% block main %}
 
+<style>
+    th, td {
+        border: 1px solid #ddd;
+    }
+    @media screen and (max-width: 600px) {
+        th, td {
+            font-size: 9px;  /* Adjust font size for smaller screens */
+            padding: 4px;     /* Reduce padding */
+        }
+    }
+</style>
+
 <td><a href="/products"><h4>Gå tillbaka</h4></a></td>
 
 <h1>Visa efter kategori</h1>
@@ -47,22 +59,15 @@
 
 </script>
 
+
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <div class="plotly-container">
     <div id="plotly-graph"></div>
-</div>
-<script>
-    // Parse the Plotly JSON and display the graph
-    var graphJson = {{ graph_json|safe }};
-    Plotly.newPlot('plotly-graph', graphJson.data, graphJson.layout);
-</script>
-
-<hr>
-
-<u><h3>Prisstatistik för kategorin</h3></u>
-<table style="height: 1%;">
+    <u><h3>Prisstatistik för kategorin</h3></u>
+<table style="height: 0.5%;">
     <thead>
         <tr>    
+            <th>Prisförändring senaste dygnet (%)</th>
             <th>Prisförändring senaste 7 Dagarna (%)</th>
             <th>Prisförändring senaste 14 Dagarna (%)</th>
             <th>Prisförändring senaste 30 Dagarna (%)</th>
@@ -76,6 +81,7 @@
     </thead>
     <tbody>
         <tr>
+            <td style="color: {{ 'green' if category_metrics.price_percentage_yesterday != 'N/A' and category_metrics.price_percentage_yesterday >= 0 else 'red' }}">{{ category_metrics.price_percentage_yesterday}}</td>
             <td style="color: {{ 'green' if category_metrics.price_percentage_7_days != 'N/A' and category_metrics.price_percentage_7_days >= 0 else 'red' }}">{{category_metrics.price_percentage_7_days}}</td>
             <td style="color: {{ 'green' if category_metrics.price_percentage_14_days != 'N/A' and category_metrics.price_percentage_14_days >= 0 else 'red' }}">{{category_metrics.price_percentage_14_days}}</td>
             <td style="color: {{ 'green' if category_metrics.price_percentage_30_days != 'N/A' and category_metrics.price_percentage_30_days >= 0 else 'red' }}">{{category_metrics.price_percentage_30_days}}</td>
@@ -87,64 +93,49 @@
         </tr>
     </tbody>
 </table>
+</div>
+<script>
+    // Parse the Plotly JSON and display the graph
+    var graphJson = {{ graph_json|safe }};
+    Plotly.newPlot('plotly-graph', graphJson.data, graphJson.layout);
+</script>
 
 <hr>
 
-<div style="overflow-x: auto; display: flex;">
-    <div style="flex: 1;">
-        <!-- Table 1: Products -->
-        <div style="height: 300px; overflow-y: auto; margin-right: 5px;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Produkt Namn</th>
-                        <th>Vikt</th>
-                        <th>Kategori</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for product in products %}
-                    <tr>
-                        <td>{{ product.id }}</td>
-                        <td><a href="/products/{{ product.product_code }}">{{ product.product_name }}</a></td>
-                        <td>{{ product.weight }}</td>
-                        <td>{{ product.category }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
 
-    <div style="flex: 1;">
-        <!-- Table 2: Price History -->
-        <div style="height: 300px; overflow-y: auto; margin-left: 5px;">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Produkt ID</th>
-                        <th>Pris</th>
-                        <th>Jmf-pris</th>
-                        <th>Datum</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in price_history %}
-                    <tr>
-                        <td>{{ item.id }}</td>
-                        <td>{{ item.product_id }}</td>
-                        <td>{{ item.price }}</td>
-                        <td>{{ item.unit }}</td>
-                        <td>{{ item.date }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- Table 1: Products -->
+        <div class="container">
+            <div style="height: 300px; overflow-y: auto; width: 100%;">
+                <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                    <thead>
+                        <tr>
+                            <th>Produkt Namn</th>
+                            <th>Vikt</th>
+                            <th>Pris</th>
+                            <th>Högsta pris</th>
+                            <th>Lägsta pris</th>
+                            <th>Jmf-pris</th>
+                            <!--<th>Kategori</th>
+                            <th>Datum</th>-->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in combined_dict %}
+                        <tr>
+                            <td style="width: fit-content;"><a href="/products/{{ product.product_code }}">{{ product.product_name }}</a></td>
+                            <td>{{ product.weight }}</td>
+                            <td>{{ product.price }}</td>
+                            <td>{{ product.max_price }}</td>
+                            <td>{{ product.min_price }}</td>
+                            <td>{{ product.unit }}</td>
+                            <!--<td>{{ product.category }}</td>
+                            <td>{{ product.date}}</td>-->
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    </div>
-</div>
 
 
 {% endblock %}

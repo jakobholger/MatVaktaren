@@ -51,13 +51,19 @@ def index():
     # Connect to DB
     connection = get_db_connection()
     cursor = connection.cursor()
-    cursor.execute("""
+    results = cursor.execute("""
     SELECT category, COUNT(*) AS count
     FROM products
     GROUP BY category
-    """)
+    """).fetchall()
 
-    results = cursor.fetchall()
+
+    product_counts = cursor.execute("""
+    SELECT COUNT(*) AS product_count
+    FROM products
+    """).fetchone()
+
+    product_count = product_counts[0] if product_counts else 0
 
     keys = ("category", "count")
 
@@ -89,7 +95,7 @@ def index():
     graph_json = fig.to_json()
 
 
-    return render_template("index.html", graph_json=graph_json)
+    return render_template("index.html", graph_json=graph_json, count=product_count)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -183,6 +189,7 @@ def product_page(product_code):
     thirty_days_ago = current_date - timedelta(days=30)
 
     current_price = "N/A"
+    compare_price = "N/A"
     price_yesterday = "N/A"
     price_percentage_yesterday = "N/A"
     price_7_days_ago = "N/A"
@@ -199,6 +206,7 @@ def product_page(product_code):
     for row in price_history_list:
         if row['date'] == current_date:
             current_price = row['price']
+            compare_price = row['unit']
         
         if row['date'] == yesterday_date:
             price_yesterday = row['price']
@@ -234,6 +242,7 @@ def product_page(product_code):
         "all_time_high": product_dict['max_price'],
         "all_time_low": product_dict['min_price'],
         "average_price": average_price,
+        "compare_price": compare_price,
         "price_change_yesterday": price_change_yesterday,
         "price_percentage_yesterday": price_percentage_yesterday,
         "price_change_7_days": price_change_7_days,
@@ -283,17 +292,13 @@ def category(category):
     cursor = connection.cursor()
 
     # Query database for products where the category column contains the specified category
-    query = "SELECT * FROM products WHERE category LIKE ?"
-    products = cursor.execute(query, ('%' + category + '%',)).fetchall()
+    products = cursor.execute("SELECT * FROM products WHERE category LIKE ?", ('%' + category + '%',)).fetchall()
 
     # Ensure products were found
     if not products:
         return apology("No products found in the specified category", 400)
     
-
-    product_keys = ("id", "product_name", "weight", "max_price", "min_price", "category", "product_code")
-    product_list = get_list_of_dict(product_keys, products)
-
+    product_list = get_list_of_dict(("id", "product_name", "weight", "max_price", "min_price", "category", "product_code"), products)
 
     current_date = datetime.now().date()
     # Fetch price history for each product to the table for prices (down right in html page)
@@ -306,6 +311,23 @@ def category(category):
     if not price_history:
         return apology("No price history found for the products in the specified category", 400)
     
+
+    # Create a mapping from product_id to price_history entries for quick lookup
+    data_price_map = {item['product_id']: item for item in price_history}
+
+    combined_dict = []
+
+    # Iterate through data_products and combine with matching entries from data_price_history
+    for product in product_list:
+        product_id = product['id']
+        if product_id in data_price_map:
+            combined_entry = {**product, **data_price_map[product_id]}
+            combined_dict.append(combined_entry)
+        else:
+            print(f"Product ID {product_id} not found in data_price_map")  # Debug statement for missing keys
+
+
+    
     price_stats = []
     for product in product_list:
         item = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
@@ -314,14 +336,17 @@ def category(category):
     if not price_stats:
         return apology("No price history found for the products in the specified category", 400)
     
+    yesterday = current_date - timedelta(days=1)
     seven_days_ago = current_date - timedelta(days=7)
     fourteen_days_ago = current_date - timedelta(days=14)
     thirty_days_ago = current_date - timedelta(days=30)
 
     current_price = 0
+    price_yesterday = 0
     price_7_days_ago = 0
     price_14_days_ago = 0
     price_30_days_ago = 0
+    price_percentage_yesterday = "N/A"
     price_percentage_7_days = "N/A"
     price_percentage_14_days = "N/A"
     price_percentage_30_days = "N/A"
@@ -331,6 +356,8 @@ def category(category):
     for row in price_stats:
         if row['date'] == current_date:
             current_price += row['price']
+        if row['date'] == yesterday:
+            price_yesterday += row['price']
         if row['date'] == seven_days_ago:
             price_7_days_ago += row['price']
         if row['date'] == fourteen_days_ago:
@@ -340,6 +367,8 @@ def category(category):
 
     # Calculate price changes for different time periods
     if current_price != 0:
+        if price_yesterday != 0:
+            price_percentage_yesterday = round_float_to_one_decimals(((current_price-price_yesterday)/price_yesterday)*100)
         if price_7_days_ago != 0:
             price_percentage_7_days = round_float_to_one_decimals(((current_price-price_7_days_ago)/price_7_days_ago)*100)
         if price_14_days_ago != 0:
@@ -350,6 +379,7 @@ def category(category):
 
     # Create a dictionary with all the values
     category_metrics = {
+        "price_percentage_yesterday": price_percentage_yesterday,
         "price_percentage_7_days" : price_percentage_7_days,
         "price_percentage_14_days" : price_percentage_14_days,
         "price_percentage_30_days" : price_percentage_30_days
@@ -402,7 +432,7 @@ def category(category):
     # Convert figure to JSON
     graph_json = fig.to_json()
 
-    return render_template('category.html', graph_json=graph_json, products=products, price_history=price_history, category_metrics=category_metrics)
+    return render_template('category.html', graph_json=graph_json, products=products, price_history=price_history, category_metrics=category_metrics, combined_dict=combined_dict)
 
 def round_float_to_one_decimals(num):
     # Convert the float to a string
@@ -451,8 +481,6 @@ def product():
     # Create a mapping from product_id to price_history entries for quick lookup
     data_price_map = {item['product_id']: item for item in data_price_history}
 
-    print("data_price_map keys:", data_price_map.keys())  # Debug statement to check keys
-
     combined_dict = []
 
     # Iterate through data_products and combine with matching entries from data_price_history
@@ -461,8 +489,6 @@ def product():
         if product_id in data_price_map:
             combined_entry = {**product, **data_price_map[product_id]}
             combined_dict.append(combined_entry)
-        else:
-            print(f"Product ID {product_id} not found in data_price_map")  # Debug statement for missing keys
 
 
     """
@@ -574,7 +600,7 @@ def product():
     paper_bgcolor="#293251",
     plot_bgcolor="#c9c8c3",
     font=dict(color='white', size = 9),  # Set the color of all text to white
-    title=dict(font=dict(color='white')),  # Set the color of the title text to white
+    title=dict(font=dict(color='white', size=10)),  # Set the color of the title text to white
     xaxis=dict(title=dict(font=dict(color='white')), tickangle = 45),  # Set the color of the x-axis title text to white
     yaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the y-axis title text to white
     legend=dict(title=dict(font=dict(color='white')), font=dict(color='white')),  # Set the color of legend text to white

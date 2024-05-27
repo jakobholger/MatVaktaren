@@ -1,6 +1,7 @@
 from flask import Flask, flash, redirect, render_template, request, session, g, url_for
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
+from waitress import serve
 
 from helpers import apology, login_required
 
@@ -343,8 +344,6 @@ def category(category):
         else:
             print(f"Product ID {product_id} not found in data_price_map")  # Debug statement for missing keys
 
-
-    
     price_stats = []
     for product in product_list:
         item = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product['id'],)).fetchall()
@@ -394,9 +393,6 @@ def category(category):
             price_percentage_30_days = round_float_to_one_decimals(((current_price-price_30_days_ago)/price_30_days_ago)*100)
 
     category_title = ""
-
-    print(category)
-
 
     if "|" in category:
         match category.split("|")[0]:
@@ -539,36 +535,6 @@ def product():
             combined_entry = {**product, **data_price_map[product_id]}
             combined_dict.append(combined_entry)
 
-
-    """
-    # Create a dictionary to map product IDs to product names
-    product_id_to_name = {item['id']: item['product_name'] for item in data_products}
-
-    # Assign product names to dataPriceHistory items based on their product IDs
-    for data in data_price_history:
-        product_id = data['product_id']
-        product_name = product_id_to_name.get(product_id, 'Unknown Product')
-        data['name'] = f"{product_name} (ID: {product_id})"  # Append product ID to the product name
-
-
-    df = pd.DataFrame(data_price_history)
-
-    fig = px.bar(df, x='name', y='price', labels={'price': 'Pris (kr)', 'name' : 'Namn'}, title='Nuvarande pris för samtliga produkter')
-
-    fig.update_layout(
-        autosize=True,
-        margin=dict(l=10, r=10, t=70, b=10),
-        paper_bgcolor="#293251",
-        plot_bgcolor="#c9c8c3",
-        font=dict(color='white', size = 9),  # Set the color of all text to white
-        title=dict(font=dict(color='white')),  # Set the color of the title text to white
-        xaxis=dict(title=dict(font=dict(color='white')), tickangle = 45),  # Set the color of the x-axis title text to white
-        yaxis=dict(title=dict(font=dict(color='white'))),  # Set the color of the y-axis title text to white
-        legend=dict(title=dict(font=dict(color='white')), font=dict(color='white')),  # Set the color of legend text to white
-    )
-
-    graph_json = fig.to_json()
-    """
 
     total_prices = cursor.execute("SELECT * FROM total_price").fetchall()
     total_price_history = [dict(zip(('id', 'value', 'date'), price)) for price in total_prices]
@@ -769,5 +735,10 @@ def register():
     else:
         return render_template("register.html")
     
+mode = "dev"
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=3001)  # Run the app on all available network interfaces
+    if mode == "dev":
+        app.run(host='0.0.0.0', port=3001)
+    else:
+        serve(app, host='0.0.0.0', port=3001)

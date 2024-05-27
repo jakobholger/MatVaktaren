@@ -51,10 +51,13 @@ def index():
     # Connect to DB
     connection = get_db_connection()
     cursor = connection.cursor()
+    # SQL query to select the first category before the first '|'
     results = cursor.execute("""
-    SELECT category, COUNT(*) AS count
+    SELECT 
+        LEFT(category, CHARINDEX('|', category + '|') - 1) AS first_category, 
+        COUNT(*) AS count
     FROM products
-    GROUP BY category
+    GROUP BY LEFT(category, CHARINDEX('|', category + '|') - 1)
     """).fetchall()
 
 
@@ -68,6 +71,25 @@ def index():
     keys = ("category", "count")
 
     list_of_results = get_list_of_dict(keys, results)
+
+    for item in list_of_results:
+        match item['category']:
+            case "mejeri-ost-och-agg":
+                item['category'] = "Mejeri ost och ägg"
+            
+            case "fardigmat":
+                item['category'] = "Färdigmat"
+
+            case "kott-chark-och-fagel":
+                item['category'] = "Kött chark och fågel"
+
+            case "frukt-och-gront":
+                item['category'] = "Frukt och grönt"
+
+            case _:
+                item['category'] = item['category'].replace("-", " ").capitalize()
+
+            
 
     connection.close()
     
@@ -281,11 +303,6 @@ def product_page(product_code):
 
 @app.route('/products/category/<category>', methods=['GET', 'POST'])
 def category(category):
-    if request.method == 'POST':
-        # Get the selected category from the form
-        selected_category = request.form['category']
-        # Redirect to a new route with the selected category as parameter
-        return redirect(url_for('category', category=selected_category))
 
     # Connect to DB
     connection = get_db_connection()
@@ -376,9 +393,47 @@ def category(category):
         if price_30_days_ago != 0:
             price_percentage_30_days = round_float_to_one_decimals(((current_price-price_30_days_ago)/price_30_days_ago)*100)
 
+    category_title = ""
+
+    print(category)
+
+
+    if "|" in category:
+        match category.split("|")[0]:
+            case "mejeri-ost-och-agg":
+                category_title = "Mejeri ost och ägg" + " - " + category.split("|")[1].replace("-", " ")
+            
+            case "fardigmat":
+                category_title = "Färdigmat" + " - " + category.split("|")[1].replace("-", " ")
+
+            case "kott-chark-och-fagel":
+                category_title = "Kött chark och fågel" + " - " + category.split("|")[1].replace("-", " ")
+
+            case "frukt-och-gront":
+                category_title = "Frukt och grönt" + " - " + category.split("|")[1].replace("-", " ")
+
+            case _:
+                category_title = category.replace("-", " ").replace("|", " ").capitalize()
+    else:
+        match category:
+            case "mejeri-ost-och-agg":
+                category_title = "Mejeri ost och ägg"
+            
+            case "fardigmat":
+                category_title = "Färdigmat"
+
+            case "kott-chark-och-fagel":
+                category_title = "Kött chark och fågel"
+
+            case "frukt-och-gront":
+                category_title = "Frukt och grönt"
+
+            case _:
+                category_title = category.replace("-", " ").capitalize()
 
     # Create a dictionary with all the values
     category_metrics = {
+        "title":category_title,
         "price_percentage_yesterday": price_percentage_yesterday,
         "price_percentage_7_days" : price_percentage_7_days,
         "price_percentage_14_days" : price_percentage_14_days,
@@ -441,7 +496,7 @@ def round_float_to_one_decimals(num):
     dot_index = num_str.find(".")
     if dot_index != -1:  # Check if dot exists in the string
         # Slice the string up to two characters after the dot index
-        rounded_str = num_str[:dot_index + 2]
+        rounded_str = num_str[:dot_index + 3]
         # Convert the rounded string back to float and return
         return float(rounded_str)
     else:
@@ -452,12 +507,6 @@ def round_float_to_one_decimals(num):
 
 @app.route("/products", methods=['GET', 'POST'])
 def product():
-    if request.method == 'POST':
-        # Get the selected category from the form
-        selected_category = request.form['category']
-        # Redirect to a new route with the selected category as parameter
-        return redirect(url_for('category', category=selected_category))
-    
     # Connect to DB
     connection = get_db_connection()
     cursor = connection.cursor()

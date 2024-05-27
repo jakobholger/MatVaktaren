@@ -1,14 +1,12 @@
 from scraperFunction import scrape
-from datetime import datetime
 import csv
 from dbFunctions import create_total_price
+import threading
+import time
 
 csv_file_path = 'WillysProducts.csv'
 
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
-}
-
+threads = []
 
 with open(csv_file_path, mode='r', newline='') as file:
     reader = csv.reader(file)
@@ -17,8 +15,14 @@ with open(csv_file_path, mode='r', newline='') as file:
 
     for row in reader:
         product_code = row[1]
-        scrape(product_code)
+        scrape_thread = threading.Thread(target=scrape, args=(product_code,))
+        threads.append(scrape_thread)
+        scrape_thread.start()
+        time.sleep(0.01)
+        #scrape(product_code)
+
+# Wait for all threads to complete
+for thread in threads:
+    thread.join()
 
 create_total_price()
-
-print("done")

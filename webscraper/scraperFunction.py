@@ -3,7 +3,6 @@ import json
 from dbFunctions import create_product, add_price_for_product, check_exists_for_current_date, get_product_id, create_price_for_existing_product
 from datetime import datetime
 
-
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36",
 }
@@ -38,7 +37,7 @@ def parse_html(html_content, product_code):
     json_data["price"] = priceCurrency[0].replace(",", ".")
     json_data["currency"] = priceCurrency[1]
 
-    print(json_data['name'], "|", json_data['price'], json_data['currency'], "/", json_data['displayVolume'], "|", json_data['comparePrice'], "/", json_data['comparePriceUnit'])
+    #print(json_data['name'], "|", json_data['price'], json_data['currency'], "/", json_data['displayVolume'], "|", json_data['comparePrice'], "/", json_data['comparePriceUnit'])
 
     create_product(json_data['name'], json_data['displayVolume'], json_data['price'], json_data['price'], product_code, json_data['googleAnalyticsCategory'])
     add_price_for_product(json_data['name'], json_data['price'], json_data['currency'], date, json_data['comparePrice'] + "/" + json_data['comparePriceUnit'], product_code)

@@ -741,4 +741,5 @@ if __name__ == '__main__':
     if mode == "dev":
         app.run(host='0.0.0.0', port=3001)
     else:
+        print("Running app using WSGI server with Waitress.")
         serve(app, host='0.0.0.0', port=3001)

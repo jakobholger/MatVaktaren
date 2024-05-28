@@ -735,7 +735,7 @@ def register():
     else:
         return render_template("register.html")
     
-mode = "dev"
+mode = "s"
 
 if __name__ == '__main__':
     if mode == "dev":

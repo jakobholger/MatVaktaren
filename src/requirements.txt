@@ -7,3 +7,4 @@ datetime
 pandas_market_calendars
 python-dotenv
 pyodbc
+waitress

@@ -18,7 +18,7 @@ with open(csv_file_path, mode='r', newline='') as file:
         scrape_thread = threading.Thread(target=scrape, args=(product_code,))
         threads.append(scrape_thread)
         scrape_thread.start()
-        time.sleep(0.01)
+        time.sleep(0.05)
         #scrape(product_code)
 
 # Wait for all threads to complete

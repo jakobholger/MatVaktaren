@@ -83,6 +83,8 @@ pip install -r requirements.txt
 ```
 #python3 main.py
 flask --app app.py run
+||
+python app.py
 ```
 8. Exit the program
 ```

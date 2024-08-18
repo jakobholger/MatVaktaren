@@ -3,6 +3,15 @@
 <html lang="en">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-9GNRFG4CE5"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-9GNRFG4CE5');
+    </script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -16,20 +25,20 @@
     <!-- Custom CSS -->
     <link href="/static/styles.css" rel="stylesheet">
 
-    <title>Mat Vaktaren: {% block title %}{% endblock %}</title>
+    <title>Matvaktaren: {% block title %}{% endblock %}</title>
 </head>
 
 <body>
     <nav class="navbar navbar-expand-md navbar-dark bg-dark border-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/"><span class="rainbow-text">Mat</span> <span class="rainbow-text-secondary">Vaktaren</span></a>
+            <a class="navbar-brand" href="/"><span class="rainbow-text">Matvaktaren</span></a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbar">
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link active" href="/products">Total Översikt</a></li>
-
+                <!--
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Skafferi
@@ -120,6 +129,7 @@
                     <li class="nav-item"><a class="nav-link" href="/products/category/fisk-och-skaldjur">Fisk och skaldjur</a></li>
 
                     <li class="nav-item"><a class="nav-link" href="/products/category/glass-godis-och-snacks">Godis och snacks</a></li>
+                -->
 
                 {% if session["user_id"] %}
                     <ul class="navbar-nav me-auto mt-2 mt-lg-0">

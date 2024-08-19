@@ -3,3 +3,5 @@ src/__pycache__
 webscraper/__pycache__
 src/flask_session
 **/config.py
+webscraper/remover.py
+webscraper/test.py

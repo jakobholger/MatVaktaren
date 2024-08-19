@@ -30,8 +30,17 @@ def add_price_for_product(product_name, price, currency, date, unit, product_cod
             # Update min price
             cursor.execute('''UPDATE products SET min_price = ? WHERE id = ?''', (price, product_id))
 
-        cursor.execute('''INSERT INTO price_history (product_id, price, currency, date, unit)
-                  VALUES (?, ?, ?, ?, ?)''', (product_id, price, currency, date, unit))
+
+        cursor.execute('''SELECT * FROM price_history WHERE product_id = ? ORDER BY date DESC''',(product_id,))
+
+        latest_record = cursor.fetchone()
+
+        if price == float(latest_record[2]):
+            print("Same value as last entry, not pushing to database.")
+
+        else:
+            cursor.execute('''INSERT INTO price_history (product_id, price, currency, date, unit)
+                    VALUES (?, ?, ?, ?, ?)''', (product_id, price, currency, date, unit))
 
         conn.commit()
         conn.close()
@@ -121,20 +130,12 @@ def create_total_price():
         products = cursor.execute('''SELECT * FROM products''').fetchall()
 
         for product in products:
-            exists = False
-            time_delta = 0
-
-            while not exists:
-                price = cursor.execute('''SELECT * FROM price_history WHERE product_id = ? AND date = ?''',(product[0], current_date - timedelta(days=time_delta),)).fetchall()
-                time_delta+=1
-
-                if price:
-                    exists = True
-                    total_sum += price[0][2]
-                if time_delta > 7:
-                    exists = True
-                    print("No previous price was found within 7 days ago.")
-
+            price = cursor.execute('''SELECT * FROM price_history WHERE product_id = ? ORDER BY date DESC''',(product[0],)).fetchall()
+            if price:
+                total_sum += price[2]
+            else:
+                print("No previous price was found.")
+                
         cursor.execute('''INSERT INTO total_price (value, date) VALUES (?, ?)''', (total_sum, current_date,))
 
         conn.commit()

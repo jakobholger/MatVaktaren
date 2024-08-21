@@ -177,29 +177,96 @@ def product_page(product_id):
     
     # Convert product tuple to dictionary
     product_dict = {
-        'id': product[0],
+        'id': product_id,
         'product_name': product[1],
         'weight': product[2],
         'max_price': product[3],
         'min_price': product[4],
         'category': product[5],
         'product_code': product[6]
-}
+    }
     
-    price_history = cursor.execute("SELECT * FROM price_history WHERE product_id = ?", (product_dict['id'],)).fetchall()
+    price_history = cursor.execute("SELECT * FROM price_history WHERE product_id = ? ORDER BY date ASC", (product_id,)).fetchall()
 
     connection.close()
     price_history_list = []
     # Convert price history to dictionary or list of dictionaries based on length
-    for row in price_history:
+    if len(price_history) > 1:
+        for i in range(0, len(price_history)-1):
+            current_row = price_history[i]
+            current_date = current_row[5]
+            
+            next_row = price_history[i + 1]
+            next_date = next_row[5]
+
+            price_history_list.append({
+            'id': product_id,
+            'product_id': current_row[1],
+            'price': current_row[2],
+            'currency': current_row[3],
+            'unit': current_row[4],
+            'date': current_row[5]
+            })
+
+            # Check the difference in days
+            days_difference = (next_date - current_date).days
+
+            # Fill the gaps with the previous price
+            if days_difference > 1:
+                for j in range(1, days_difference):
+                    fill_date = current_date + timedelta(days=j)
+                    price_history_list.append({
+                        'id': product_id,  # No ID for filled-in recordss
+                        'product_id': current_row[1],
+                        'price': current_row[2],  # Use the current price to fill the gap
+                        'currency': current_row[3],
+                        'unit': current_row[4],
+                        'date': fill_date
+                    })
+        # Add the last record
+        last_row = price_history[-1]
         price_history_list.append({
-        'id': row[0],
-        'product_id': row[1],
-        'price': row[2],
-        'currency': row[3],
-        'unit': row[4],
-        'date': row[5]
+        'id': product_id,
+        'product_id': last_row[1],
+        'price': last_row[2],
+        'currency': last_row[3],
+        'unit': last_row[4],
+        'date': last_row[5]
         })
+
+        days_difference = (datetime.now().date() - last_row[5]).days
+
+        if days_difference > 1:
+
+            # Fill the gaps with the previous price
+            if days_difference > 1:
+                for j in range(1, days_difference+1):
+                    fill_date = last_row[5] + timedelta(days=j)
+                    price_history_list.append({
+                        'id': product_id,  # No ID for filled-in recordss
+                        'product_id': last_row[1],
+                        'price': last_row[2],  # Use the current price to fill the gap
+                        'currency': last_row[3],
+                        'unit': last_row[4],
+                        'date': fill_date
+                    })
+
+    else:
+        current_date = datetime.now().date()
+        start_date = price_history[0][5]
+        days_difference = (current_date - start_date).days
+        current = price_history[0]
+
+        for j in range(0, days_difference+1):
+            fill_date = start_date + timedelta(days=j)
+            price_history_list.append({
+                'id': product_id,  # No ID for filled-in recordss
+                'product_id': current[1],
+                'price': current[2],  # Use the current price to fill the gap
+                'currency': current[3],
+                'unit': current[4],
+                'date': fill_date
+            })
 
     # Calculate average price
     average_price = round(sum(row['price'] for row in price_history_list) / len(price_history_list),2)
@@ -278,7 +345,7 @@ def product_page(product_id):
 
     df = pd.DataFrame(price_history_list)
 
-    fig = px.line(df, x='date', y='price', labels={'price': 'Pris (kr)', 'date' : 'Datumn'}, markers=True, title=f'{dict(product_dict)['product_name']} Pris över tid')
+    fig = px.line(df, x='date', y='price', labels={'price': 'Pris (kr)', 'date' : 'Datum'}, markers=True, title=f'{dict(product_dict)['product_name']} Pris över tid')
 
     # Update layout
     fig.update_layout(
@@ -328,8 +395,16 @@ def product():
     
     # Query database for products and prices
     products = cursor.execute("SELECT * FROM products").fetchall()
-    price_history = cursor.execute("SELECT * FROM price_history WHERE date = ?", (datetime.now().date(),)).fetchall()
-
+    price_history = cursor.execute("""
+    SELECT ph1.*
+    FROM price_history ph1
+    INNER JOIN (
+        SELECT product_id, MAX(date) AS max_date
+        FROM price_history
+        GROUP BY product_id
+    ) ph2
+    ON ph1.product_id = ph2.product_id AND ph1.date = ph2.max_date
+    """).fetchall()
 
     # Ensure Data was not empty
     if not price_history or not products:
@@ -425,7 +500,7 @@ def product():
 
     dataframe = pd.DataFrame(total_price_history)
 
-    fig2 = px.line(dataframe, x='date', y='value', labels={'price': 'Pris (kr)', 'value' : 'Värde', 'date' : 'Datumn'}, markers=True, title= 'Total summa av samtliga produktpriser som spåras över tid')
+    fig2 = px.line(dataframe, x='date', y='value', labels={'price': 'Pris (kr)', 'value' : 'Värde', 'date' : 'Datum'}, markers=True, title= 'Total summa av samtliga produktpriser som spåras över tid')
 
     fig2.update_layout(
     autosize=True,

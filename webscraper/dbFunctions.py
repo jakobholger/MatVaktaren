@@ -35,9 +35,8 @@ def add_price_for_product(product_name, price, currency, date, unit, product_cod
 
         latest_record = cursor.fetchone()
 
-        if price == float(latest_record[2]):
+        if float(price) == float(latest_record[2]):
             print("Same value as last entry, not pushing to database.")
-
         else:
             cursor.execute('''INSERT INTO price_history (product_id, price, currency, date, unit)
                     VALUES (?, ?, ?, ?, ?)''', (product_id, price, currency, date, unit))
@@ -130,7 +129,7 @@ def create_total_price():
         products = cursor.execute('''SELECT * FROM products''').fetchall()
 
         for product in products:
-            price = cursor.execute('''SELECT * FROM price_history WHERE product_id = ? ORDER BY date DESC''',(product[0],)).fetchall()
+            price = cursor.execute('''SELECT * FROM price_history WHERE product_id = ? ORDER BY date DESC''',(product[0],)).fetchone()
             if price:
                 total_sum += price[2]
             else:
@@ -145,31 +144,5 @@ def create_total_price():
         print("Total price already exists for this day.")
         conn.close()
 
-def create_price_for_existing_product(product_code):
-    current_date = datetime.now().date()
-
-    # Create total price for all products
-    conn = get_db_connection()
-    cursor = conn.cursor()
-
-    product = cursor.execute('''SELECT * FROM products WHERE product_code = ?''', (product_code,)).fetchone()
-
-    exists = False
-    time_delta = 1
-
-
-    while not exists:
-        price = cursor.execute('''SELECT * FROM price_history WHERE product_id = ? AND date = ?''',(product[0], current_date - timedelta(days=time_delta),)).fetchone()
-        time_delta+=1
-
-        if price:
-            exists = True
-            cursor.execute('''INSERT INTO price_history (product_id, price, currency, unit, date) VALUES (?, ?, ?, ?, ?)''', (product[0], price[2], price[3], price[4], current_date))
-
-        if time_delta > 7:
-            exists = True
-            print("No previous price was found within 7 days ago.")
-    conn.commit()
-    conn.close()
 
 #Import in other python file

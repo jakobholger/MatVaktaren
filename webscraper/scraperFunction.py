@@ -1,6 +1,6 @@
 import requests
 import json
-from dbFunctions import create_product, add_price_for_product, check_exists_for_current_date, get_product_id, create_price_for_existing_product
+from dbFunctions import create_product, add_price_for_product, check_exists_for_current_date, get_product_id
 from datetime import datetime
 
 headers = {
@@ -23,8 +23,6 @@ def scrape(product_code):
 
         else:
             print("Something went wrong! Status code: " + (str)(response.status_code))
-            print("Fetching from previous date.")
-            create_price_for_existing_product(product_code)
     else:
         print("Product price already exists for this date.")
 

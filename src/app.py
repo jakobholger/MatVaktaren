@@ -383,7 +383,11 @@ def round_float_to_one_decimals(num):
     else:
         # If there's no dot, just return the original number
         return float(num)
+    
 
+@app.route("/construction", methods=['GET'])
+def construction():
+    return apology("Route Under Construction 🚧",503)
 
 
 @app.route("/products", methods=['GET', 'POST'])
@@ -421,12 +425,24 @@ def product():
 
     combined_dict = []
 
+    todays_price_change = cursor.execute("SELECT * FROM price_history WHERE date = ?", (datetime.now().date(),)).fetchall()
+
+    todays_price_dict = get_list_of_dict(('id', 'product_id', 'price', 'currency', 'unit', 'date'), todays_price_change)
+
+    # Create a mapping from product_id to price_history entries for quick lookup
+    todays_price_map = {item['product_id']: item for item in todays_price_dict}
+
+    combined_dict_today = []
+
     # Iterate through data_products and combine with matching entries from data_price_history
     for product in data_products:
         product_id = product['id']
         if product_id in data_price_map:
             combined_entry = {**product, **data_price_map[product_id]}
             combined_dict.append(combined_entry)
+        if product_id in todays_price_map:
+            combined_entry = {**product, **todays_price_map[product_id]}
+            combined_dict_today.append(combined_entry)
 
 
     total_prices = cursor.execute("SELECT * FROM total_price").fetchall()
@@ -517,7 +533,7 @@ def product():
     graph2_json = fig2.to_json()
 
     return render_template('products.html', #graph_json=graph_json,
-                            graph2_json=graph2_json, products=products, price_history=price_history, total_metrics=total_metrics, combined_dict=combined_dict)
+                            graph2_json=graph2_json, products=products, price_history=price_history, total_metrics=total_metrics, combined_dict=combined_dict, combined_dict_today=combined_dict_today)
 
 @app.route("/logout")
 def logout():

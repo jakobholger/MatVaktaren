@@ -75,7 +75,40 @@
         Plotly.Plots.resize('plotly-graph2');
     });
 </script>
-
+<u><h3>Produkter med prisförändring idag</h3></u>
+        <!-- Table 2: Products -->
+        <div class="container">
+            <div style="height: 300px; overflow-y: auto; width: 100%;">
+                <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                    <thead>
+                        <tr>
+                            <th>Produkt Namn</th>
+                            <!--<th>Vikt</th>-->
+                            <th>Nuvarande pris (kr)</th>
+                            <!--<th>Högsta pris (kr)</th>
+                            <th>Lägsta pris (kr)</th>
+                            <th>Jmf-pris</th>
+                            <th>Kategori</th>
+                            <th>Datum</th>-->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in combined_dict_today %}
+                        <tr>
+                            <td><a href="/products/{{ product.product_id }}" style="color: lightblue;">{{ product.product_name }}</a></td>
+                            <!--<td>{{ product.weight }}</td>-->
+                            <td>{{ product.price }}</td>
+                            <!--<td>{{ product.max_price }}</td>
+                            <td>{{ product.min_price }}</td>
+                            <td>{{ product.unit }}</td>
+                            <td>{{ product.category }}</td>
+                            <td>{{ product.date}}</td>-->
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
 
 <hr>
@@ -99,7 +132,7 @@
                 <tbody>
                     {% for product in combined_dict %}
                     <tr>
-                        <td><a href="/products/{{ product.product_id }}">{{ product.product_name }}</a></td>
+                        <td><a href="/products/{{ product.product_id }}" style="color: lightblue;">{{ product.product_name }}</a></td>
                         <td>{{ product.weight }}</td>
                         <td>{{ product.price }}</td>
                         <td>{{ product.max_price }}</td>
